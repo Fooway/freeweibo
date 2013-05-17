@@ -1,4 +1,4 @@
-var getUser= requie('../fetcher/api').getUser;
+var getUser= require('../fetcher/api').getUser;
 var model = require('./model')();
 var User = model.User;
 var Tweet = model.Tweet;
@@ -32,7 +32,7 @@ module.exports = {
       
     // get html
     } else {
-      res.render('index');
+      res.render('index', { title: "recent tweets"});
     }
 
   },

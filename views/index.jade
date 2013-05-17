@@ -1,5 +1,18 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .wrapper  
+    h1= title
+    .left-pane
+      form
+        input(type='text')
+        input(type='button', value='Search')
+      ul.tweets
+
+    .right-pane
+      form
+        input(type='text')
+        input(type='button', value='Add')
+      .users
+    script#tweet-template(type='template')
+    script#user-template(type='template')
