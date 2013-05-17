@@ -1,4 +1,4 @@
-var getUid= requie('../fetcher/api').getUid;
+var getUser= requie('../fetcher/api').getUser;
 var model = require('./model')();
 var User = model.User;
 var Tweet = model.Tweet;
@@ -53,14 +53,14 @@ module.exports = {
   add: function(req, res) {
     User.find({name: req.name}, function (err, user) {
       if (!user) { 
-        getUid(req.name, function(err, id) {
+        getUser(req.name, function(err, user) {
           if (err) {
             console.log(err);
             res.send({err: err});
           } else {
-            var user = new User({name: req.name, uid: id});
-            user.save(function () {
-              res.send({user: user});
+            var newuser = new User({name: req.name, uid: user.id});
+            newuser.save(function () {
+              res.send({user: newuser});
             });
           }
         });

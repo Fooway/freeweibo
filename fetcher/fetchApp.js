@@ -6,3 +6,4 @@ var fs = require('fs');
 var api = require('./api');
 var model = require('../app/model');
 
+api.getUserTweets();

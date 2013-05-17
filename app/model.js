@@ -1,10 +1,10 @@
 // create user and tweet model
-var moogoose = require('moogoose');
+var mongoose = require('mongoose');
 
 module.exports = function(url) {
   var model = {};
 
-  var db = moogoose.connect(url || 'mongodb://localhost/test');
+  var db = mongoose.connect(url || 'mongodb://localhost/test');
   // setup schema
   var userSchema = db.Schema({
     name: String,
@@ -24,8 +24,8 @@ module.exports = function(url) {
   });
 
   // setup model
-  var model.User = db.model('User', userSchema);
-  var model.Tweet = db.model('Tweet', tweetSchema);
+  model.User = db.model('User', userSchema);
+  model.Tweet = db.model('Tweet', tweetSchema);
 
   return model;
 
