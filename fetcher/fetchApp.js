@@ -30,7 +30,7 @@ var appInfo = {
   screen_name: "不停跳",
   source: 2442636523,
   access_token: "2.00ZBLjNCR2D_fC8503c0c526b1L5EC",
-  count: 10,                  // returned  number of tweets
+  count: 1,                  // returned  number of tweets
   since_id: 0,
   trim_user: 1
 };
@@ -42,6 +42,7 @@ https.get(baseApi + interface.UserTL.url + "?" + querystring.stringify(appInfo),
   res.on('end', function() {
     var buffer = Buffer.concat(buffers);
     data = JSON.parse(buffer.toString());
+    console.log(buffer.toString());
     for (var i = 0; i < data.statuses.length; i++) {
       console.log(data.statuses[i].created_at);
       console.log(data.statuses[i].id);
