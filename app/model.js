@@ -1,19 +1,24 @@
 // create user and tweet model
 var mongoose = require('mongoose');
-
+mongoose.set('debug', true);
 module.exports = function(url) {
   var model = {};
 
   var db = mongoose.connect(url || 'mongodb://localhost/test');
-  // setup schema
-  var userSchema = db.Schema({
+  console.log('mongodb connected...');
+  mongoose.connection.on('error', function() {
+    console.log('connection err');
+  });
+
+  // setup model
+  model.User = mongoose.model('User',{
     name: String,
       uid: Number
   });
-  var tweetSchema = db.Schema({
+  model.Tweet = mongoose.model('Tweet', {
     tid: Number,
       status: Number, /* 0 - normal; 1 - filtered by weibo; 2 - other */
-      create_at: Date,
+      create_at: String,
       text: String,
       user_id: Number,
       pic_url: String,
@@ -22,10 +27,6 @@ module.exports = function(url) {
       comments_count: Number,
       reposts_count: Number
   });
-
-  // setup model
-  model.User = db.model('User', userSchema);
-  model.Tweet = db.model('Tweet', tweetSchema);
 
   return model;
 

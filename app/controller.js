@@ -1,21 +1,30 @@
+var fs = require('fs');
+var path = require('path');
 var getUser= require('../fetcher/api').getUser;
 var model = require('./model')();
 var User = model.User;
 var Tweet = model.Tweet;
 
+var tweet_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'), {encoding: 'utf-8'});
+var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'), {encoding: 'utf-8'});
+
+
 module.exports = {
   
-  // GET: find all tweets and users [/]
+  // GET: [/]
   index: function(req, res) {
-    // xhr get
-    if (req.xhr) { 
-      // get tweets
+    if (req.xhr) {
+      req.tweet = 1;
+      console.log('xhr');
       if (req.tweet) {
+      console.log('tweet');
         Tweet.find(function(err, tweets) {
           if (err) {
+            console.log(err.message);
             res.send({ err: err});
           } else {
-            res.send({tweets: tweets});
+            console.log(tweets);
+            res.json(tweets);
           }
         });
       }
@@ -23,18 +32,47 @@ module.exports = {
       if (req.user) {
         User.find(function(err, users) {
           if (err) {
+            console.log(err.message);
             res.send({ err: err});
           } else {
             res.send({users: users});
           }
         });
       }
-      
-    // get html
-    } else {
-      res.render('index', { title: "recent tweets"});
     }
+    else {
+      res.render('index', { 
+        title: "recent tweets",
+        tweet_tmpl: tweet_tmpl,
+        user_tmpl: user_tmpl
+      });
+    }
+  },
 
+  // POST :get tweets or users on page loading
+  initData: function(req, res) {
+    // get tweets
+    if (req.tweet) {
+      Tweet.find(function(err, tweets) {
+        if (err) {
+          console.log(err.message);
+          res.send({ err: err});
+        } else {
+          res.send({tweets: tweets});
+        }
+      });
+    }
+    // get users
+    if (req.user) {
+      User.find(function(err, users) {
+        if (err) {
+          console.log(err.message);
+          res.send({ err: err});
+        } else {
+          res.send({users: users});
+        }
+      });
+    }
   },
 
   // POST :find tweets of a specific user [/user/:id]

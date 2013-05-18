@@ -19,7 +19,7 @@ var api = {
   user_tweets: {
     url: "statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
     param: {
-      count: 1,                  // returned  number of tweets
+      count: 10,                  // returned  number of tweets
       since_id: 0,
       trim_user: 1
     }
@@ -32,15 +32,19 @@ var api = {
 
 module.exports = {
   // get user's tweets by user
-  getUserTweets: function(option /* id or name */) {
+  getUserTweets: function(option /* id or name */, callback) {
+    if (typeof option == 'function') {
+      callback = option;
+      option = {};
+    }
     get(generateUrl('user_tweets', option), function(err, data) { 
-      if (err) { return;}
+      if (err) { callback(err); return;}
       for (var i = 0; i < data.statuses.length; i++) {
         console.log(data.statuses[i].created_at);
         console.log(data.statuses[i].id);
         console.log(data.statuses[i].text);
       };
-      return data;
+      callback(null, data.statuses);
     });
   },
 
