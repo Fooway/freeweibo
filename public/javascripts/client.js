@@ -16,7 +16,6 @@ $(function () {
   }, 'json');
 
   function insertTweet(tweet) {
-    console.log(tweet);
     $('.tweets').append(tweetTmp({tweet: tweet}));
   }
 

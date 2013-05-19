@@ -38,7 +38,10 @@ module.exports = {
       option = {};
     }
     get(generateUrl('user_tweets', option), function(err, data) { 
-      if (err) { callback(err); return;}
+      if (err || !data.statuses)  {
+        callback(err);
+        return;
+      }
       for (var i = 0; i < data.statuses.length; i++) {
         console.log(data.statuses[i].created_at);
         console.log(data.statuses[i].id);
@@ -68,6 +71,7 @@ module.exports = {
 
 // request api function
 function get(url, callback) {
+  console.log('GET: ' + url);
   https.get(url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
@@ -86,6 +90,10 @@ function get(url, callback) {
 
 function generateUrl(method, option) {
   var param = extend({}, api.account, api[method].param, option);
+
+  if (param.uid && param.screen_name) {
+    delete param.screen_name;
+  }
   // override
   return api.baseUrl + api[method].url +
     '?' + querystring.stringify(param);
