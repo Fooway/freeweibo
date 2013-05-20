@@ -53,7 +53,7 @@ function readUsers(callback) {
 function fetchTweets(user) {
   // body...
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
-    if (err || !tweets.hasOwnProperty(length)) { 
+    if (err || !tweets.hasOwnProperty('length')) { 
       console.log(err);
       return;
     }
