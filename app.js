@@ -3,10 +3,23 @@
  * Module dependencies.
  */
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path')
-  , controller = require('./app/controller');
+var express = require('express');
+var http = require('http');
+var path = require('path');
+var controller = require('./app/controller');
+
+// fork worker and redirect output stream
+var worker = require('child_process').fork('./fetcher/fetchApp.js');
+
+/*
+worker.stdout.on('data', function(data) {
+  console.log('[Fetcher]>>>: ' + data);
+});
+
+worker.stderr.on('data', function(data) {
+  console.log('[Fetcher]>>>: ' + data);
+});
+*/
 
 var app = express();
 
