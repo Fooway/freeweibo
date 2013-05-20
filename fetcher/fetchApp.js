@@ -46,6 +46,7 @@ function fetchTweets(user) {
       console.log(err.mesage);
       return;
     }
+
     for (var i = 0; i < tweets.length; i++) {
       saveTweet(tweets[i]);
     };
@@ -54,9 +55,11 @@ function fetchTweets(user) {
 
 
 function saveTweet(tweet) {
-  if (!tweet) return;
   var origin_tweet = tweet.retweeted_status;
 
+  if (!tweet) return;
+
+  // create must have a callback function
   model.Tweet.create({
     tid: tweet.id,
     create_at: tweet.created_at,
@@ -64,9 +67,13 @@ function saveTweet(tweet) {
     pic_url:tweet.original_pic, 
     user_id: tweet.uid,
     pic_local_path: tweet.original_pic,
-    origin_tweetid:  origin_tweet?origin_tweet.id:0,
+    origin_tweetid:  (origin_tweet?origin_tweet.id:0),
     comments_count: tweet.comments_count,
     reposts_count: tweet.reposts_count
+  }, function(err, tweet) {
+    if (err) {
+      console.log('save err!');
+    }
   });
 
   if (origin_tweet) {
