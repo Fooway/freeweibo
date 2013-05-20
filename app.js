@@ -9,7 +9,7 @@ var path = require('path');
 var controller = require('./app/controller');
 
 // fork worker and redirect output stream
-var worker = require('child_process').fork('./fetcher/fetchApp.js');
+var worker = require('child_process').fork(path.join(__dirname, 'fetcher/fetchApp.js'));
 
 /*
 worker.stdout.on('data', function(data) {
