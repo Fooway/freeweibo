@@ -14,28 +14,25 @@ module.exports = {
   // GET: [/]
   index: function(req, res) {
     if (req.xhr) {
-      req.tweet = 1;
-      console.log('xhr');
-      if (req.tweet) {
-      console.log('tweet');
+      if (req.query.tweet) {
         Tweet.find(function(err, tweets) {
           if (err) {
             console.log(err.message);
             res.send({ err: err});
           } else {
-            console.log(tweets);
             res.json(tweets);
           }
         });
       }
       // get users
-      if (req.user) {
+      if (req.query.user) {
         User.find(function(err, users) {
           if (err) {
             console.log(err.message);
             res.send({ err: err});
           } else {
-            res.send({users: users});
+            console.log(users);
+            res.json(users);
           }
         });
       }
@@ -77,7 +74,7 @@ module.exports = {
 
   // POST :find tweets of a specific user [/user/:id]
   user: function(req, res) {
-    Tweet.find({user_id: req.uid}, function(err, tweets) {
+    Tweet.find({user_id: req.param('id')}, function(err, tweets) {
       if (err) {
         console.log('user: ' + req.name + 'not exist!');
         res.send({err: err});

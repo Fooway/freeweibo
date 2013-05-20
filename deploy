@@ -1,0 +1,20 @@
+#!/bin/bash
+
+SERVER=( 's.chaos-lab.com' )
+DEPLOY_PATH=/var/www/filterback
+USER=xiaolei
+
+ENVIRONMENT=${1:-"production"}
+REF=${2:-"master"}
+
+trap 'test -n "$SUCCESS" || echo "  error: aborted"' EXIT
+echo "* Deploying $ENVIRONMENT/$REF"
+
+ssh $USER@$SERVER "cd $DEPLOY_PATH && \
+                   git reset --hard && \
+                   git checkout $REF && \
+                   git pull && \
+                   npm install && \
+                   /etc/init.d/filterback stop"
+
+SUCCESS=true

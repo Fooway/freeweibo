@@ -40,6 +40,7 @@ module.exports = {
     get(generateUrl('user_tweets', option), function(err, data) { 
       if (err || !data.statuses)  {
         callback(err);
+        console.log(data);
         return;
       }
       for (var i = 0; i < data.statuses.length; i++) {
@@ -52,19 +53,19 @@ module.exports = {
   },
 
   // get a tweet by tweet id
-  getTweetById: function(id) {
+  getTweetById: function(id, callback) {
     get(generateUrl('get_tweet', {id: id}), function(err, data) { 
       if (err) { return;}
-      return data;
+      callback(null,data);
     });
 
   },
 
   // get user info by screen_name
-  getUser: function(name) {
+  getUser: function(name, callback) {
     get(generateUrl('get_user', {screen_name: name}), function(err, data) { 
       if (err) { return;}
-      return data;
+      callback(null,data);
     });
   }
 };
@@ -78,6 +79,9 @@ function get(url, callback) {
     res.on('end', function() {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
+      // debug point
+      //console.log(buffer.toString());
+
       callback(null, data);
       buffer = [];
     })

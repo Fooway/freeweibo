@@ -22,6 +22,17 @@ function worker() {
   });
 })();
 
+
+function addUser(screen_name) {
+  api.getUser(screen_name, function(err, data) { 
+    console.log('user:' + JSON.stringify(data));
+    model.User.create({name: screen_name, uid: data.id}, 
+      function(err, user) { 
+        console.log(user.name + ' created!');
+      });
+  });
+}
+
 function fetcher() {
   readUsers(fetchTweets);
 }
@@ -41,11 +52,17 @@ function readUsers(callback) {
 
 function fetchTweets(user) {
   // body...
-  api.getUserTweets({uid: user.uid}, function(err, tweets) {
+  api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets.length) { 
-      console.log(err.mesage);
+      console.log(err);
       return;
     }
+
+    model.User.update({uid:user.uid}, {latest_tid: tweets[0].id}, function(err) {
+      if (err) { 
+        console.log(err.mesage);
+      }
+    });
 
     for (var i = 0; i < tweets.length; i++) {
       saveTweet(tweets[i]);
@@ -79,4 +96,8 @@ function saveTweet(tweet) {
   if (origin_tweet) {
     saveTweet(origin_tweet);
   }
+}
+
+function updateLatestTweetId(tid) {
+  // body...
 }
