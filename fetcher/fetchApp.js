@@ -54,7 +54,11 @@ function fetchTweets(user) {
   // body...
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets.length) { 
+      if (err) {
       console.log(err);
+      } else {
+        console.log('no new tweet for [' + user.name + ']');
+      }
       return;
     }
 

@@ -80,7 +80,7 @@ function get(url, callback) {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      console.log(buffer.toString());
+      //console.log(buffer.toString());
 
       callback(null, data);
       buffer = [];
