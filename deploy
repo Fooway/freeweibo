@@ -14,7 +14,8 @@ ssh $USER@$SERVER "cd $DEPLOY_PATH && \
                    git reset --hard && \
                    git checkout $REF && \
                    git pull && \
-                   npm install && \
+                   npm install && 
+                   stylus  public/stylesheets/ &&\
                    /etc/init.d/filterback restart"
 
 SUCCESS=true
