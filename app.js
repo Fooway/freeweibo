@@ -16,15 +16,6 @@ process.on('exit', function() {
   worker.kill('KILL');
 });
 
-/*
-worker.stdout.on('data', function(data) {
-  console.log('[Fetcher]>>>: ' + data);
-});
-
-worker.stderr.on('data', function(data) {
-  console.log('[Fetcher]>>>: ' + data);
-});
-*/
 
 var app = express();
 
@@ -39,7 +30,10 @@ app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
 app.use(app.router);
-app.use(require('stylus').middleware(__dirname + '/public'));
+app.use(require('stylus').middleware({debug: true,
+  src:__dirname + '/public',
+  dst:__dirname + '/public'})
+    );
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
