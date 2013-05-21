@@ -100,7 +100,7 @@ module.exports = {
           }
         });
       } else {
-        res.send({user: user});
+        res.send({});
       }
     });
   },

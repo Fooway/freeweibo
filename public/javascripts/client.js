@@ -16,6 +16,18 @@ $(function () {
     };
   }, 'json');
 
+  $('#add_tweeter').on('click', function() {
+    var name = $('#tweeter_name').val();
+    if (name) {
+      $.post('/add', {name: name}, function(data) {
+        if (data && data.user) {
+          insertUser(user);
+        }
+        if (data && data.err) { alert(err); }
+      });
+    }
+  });
+
   function insertTweet(tweet) {
     $('.tweets').append(tweetTmp({tweet: tweet}));
   }

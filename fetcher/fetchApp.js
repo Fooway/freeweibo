@@ -8,7 +8,7 @@ var model = require('../app/model')();
 
 function worker() {
   fetcher();
-  setInterval(worker, 60000);
+  setTimeout(worker, 60000);
 }
 
 (function () {
@@ -53,7 +53,7 @@ function readUsers(callback) {
 function fetchTweets(user) {
   // body...
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
-    if (err || !tweets.length) { 
+    if (err || !tweets || !tweets.length) { 
       if (err) {
       console.log(err);
       } else {

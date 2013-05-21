@@ -11,8 +11,8 @@ block content
 
     .right-pane
       form
-        input(type='text')
-        input(type='button', value='Add')
+        input(type='text', id='tweeter_name')
+        input(id='add_tweeter', type='button', value='Add')
       .users
     script#tweet-template(type='template')
       !{ tweet_tmpl }
