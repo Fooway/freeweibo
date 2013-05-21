@@ -23,16 +23,6 @@ function worker() {
 })();
 
 
-function addUser(screen_name) {
-  api.getUser(screen_name, function(err, data) { 
-    console.log('user:' + JSON.stringify(data));
-    model.User.create({name: screen_name, uid: data.id}, 
-      function(err, user) { 
-        console.log(user.name + ' created!');
-      });
-  });
-}
-
 function fetcher() {
   readUsers(fetchTweets);
 }
@@ -62,6 +52,7 @@ function fetchTweets(user) {
       return;
     }
 
+    console.log('fetched ' + tweets.length + ' tweets for ' + user.name);
     model.User.update({uid:user.uid}, {latest_tid: tweets[0].id}, function(err) {
       if (err) { 
         console.log(err.mesage);

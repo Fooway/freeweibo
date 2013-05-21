@@ -18,6 +18,7 @@ $(function () {
 
   $('#add_tweeter').on('click', function() {
     var name = $('#tweeter_name').val();
+    console.log(name);
     if (name) {
       $.post('/add', {name: name}, function(data) {
         if (data && data.user) {

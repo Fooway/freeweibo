@@ -76,7 +76,6 @@ module.exports = {
   user: function(req, res) {
     Tweet.find({user_id: req.param('id')}, function(err, tweets) {
       if (err) {
-        console.log('user: ' + req.name + 'not exist!');
         res.send({err: err});
       } else {
         res.send({tweets: tweets});
@@ -86,14 +85,20 @@ module.exports = {
 
   // POST: add a user to watch [/add]
   add: function(req, res) {
-    User.find({name: req.name}, function (err, user) {
-      if (!user) { 
-        getUser(req.name, function(err, user) {
+    var screen_name = req.param('name');
+    User.find({name: screen_name}, function (err, user) {
+      console.log('finish find!');
+      if (err) {
+        res.send({err: err});
+        return;
+      }
+      if (!user.length) { 
+        getUser(screen_name, function(err, user) {
           if (err) {
             console.log(err);
             res.send({err: err});
           } else {
-            var newuser = new User({name: req.name, uid: user.id});
+            var newuser = new User({name: screen_name, uid: user.id});
             newuser.save(function () {
               res.send({user: newuser});
             });

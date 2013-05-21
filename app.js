@@ -11,9 +11,14 @@ var controller = require('./app/controller');
 // fork worker and redirect output stream
 var worker = require('child_process').fork(path.join(__dirname, 'fetcher/fetchApp.js'));
 
-process.on('exit', function() {
+process.on('SIGINT', function() {
   console.log('web app down, killing worker deamon');
   worker.kill('KILL');
+});
+
+process.on('exit', function() {
+  console.log('web app down, killing worker deamon');
+  worker.kill('SIGINT');
 });
 
 
