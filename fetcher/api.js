@@ -20,8 +20,8 @@ var api = {
     url: "statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
     param: {
       count: 10,                  // returned  number of tweets
-      since_id: 0,
-      trim_user: 1
+      since_id: 0
+      //trim_user: 1
     }
   },
 
@@ -43,11 +43,6 @@ module.exports = {
         console.log(data);
         return;
       }
-      for (var i = 0; i < data.statuses.length; i++) {
-        console.log(data.statuses[i].created_at);
-        console.log(data.statuses[i].id);
-        console.log(data.statuses[i].text);
-      };
       callback(null, data.statuses);
     });
   },

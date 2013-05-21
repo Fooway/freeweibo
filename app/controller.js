@@ -15,7 +15,10 @@ module.exports = {
   index: function(req, res) {
     if (req.xhr) {
       if (req.query.tweet) {
-        Tweet.find(function(err, tweets) {
+        Tweet.find().where('origin_tweetid')
+        .equals(0)
+        .sort('-create_at')
+        .exec(function(err, tweets) {
           if (err) {
             console.log(err.message);
             res.send({ err: err});
@@ -98,10 +101,19 @@ module.exports = {
             console.log(err);
             res.send({err: err});
           } else {
-            var newuser = new User({name: screen_name, uid: user.id});
-            newuser.save(function () {
-              res.send({user: newuser});
+            var newuser = new User({
+              name: screen_name, 
+              uid: user.id,
+              img_url: user.profile_image_url,
+              latest_tid: 0,
+              location: user.location,
+              description: user.description,
+              gender: user.gender,
+              followers_cnt: user.followers_count,
+              friends_cnt: user.friends_count,
+              tweets_cnt: user.statuses_count
             });
+            newuser.save(function () { res.send({user: newuser}); });
           }
         });
       } else {

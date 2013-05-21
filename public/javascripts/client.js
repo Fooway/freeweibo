@@ -21,15 +21,16 @@ $(function () {
     console.log(name);
     if (name) {
       $.post('/add', {name: name}, function(data) {
-        if (data && data.user) {
+        if (data && data.hasOwnProperty('user')) {
           insertUser(user);
         }
-        if (data && data.err) { alert(err); }
+        if (data && data.hasOwnProperty('err')) {console.log(err); }
       });
     }
   });
 
   function insertTweet(tweet) {
+    tweet.create_at = (new Date(tweet.create_at)).toLocaleString();
     $('.tweets').append(tweetTmp({tweet: tweet}));
   }
 

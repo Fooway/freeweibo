@@ -11,17 +11,7 @@ function worker() {
   setTimeout(worker, 60000);
 }
 
-(function () {
-  // body...
-  model.User.find(function(err, user) {
-    if (user.length == 0) {
-      model.User.create({name: '不停跳', uid: 2035125173}, worker);
-    } else {
-      worker();
-    }
-  });
-})();
-
+worker();
 
 function fetcher() {
   readUsers(fetchTweets);
@@ -68,16 +58,23 @@ function fetchTweets(user) {
 
 function saveTweet(tweet) {
   var origin_tweet = tweet.retweeted_status;
+  var uid = 0;
+  var name = '';
 
   if (!tweet) return;
 
+  if (tweet.hasOwnProperty('user')) {
+    var uid = tweet.user.id;
+    var name = tweet.user.screen_name;
+  }
   // create must have a callback function
   model.Tweet.create({
     tid: tweet.id,
-    create_at: tweet.created_at,
+    create_at: (new Date(tweet.created_at)).valueOf(),
     text: tweet.text,
-    pic_url:tweet.original_pic, 
-    user_id: tweet.uid,
+    origin_pic_url: tweet.original_pic || '', 
+    user_id: uid,
+    user_name: name,
     pic_local_path: tweet.original_pic,
     origin_tweetid:  (origin_tweet?origin_tweet.id:0),
     comments_count: tweet.comments_count,
