@@ -15,6 +15,6 @@ ssh $USER@$SERVER "cd $DEPLOY_PATH && \
                    git checkout $REF && \
                    git pull && \
                    npm install && \
-                   /etc/init.d/filterback stop"
+                   /etc/init.d/filterback restart"
 
 SUCCESS=true
