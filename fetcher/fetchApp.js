@@ -6,6 +6,14 @@ var fs = require('fs');
 var api = require('./api');
 var model = require('../app/model')();
 
+process.on('SIGTERM', function() {
+  process.exit();
+});
+
+process.on('exit', function() {
+  console.log('worker quiting...');
+});
+
 function worker() {
   fetcher();
   setTimeout(worker, 60000);
