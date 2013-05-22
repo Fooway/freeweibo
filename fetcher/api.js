@@ -8,25 +8,34 @@ var https = require('https');
 var querystring = require('querystring');
 var extend = require('extend');
 
+var account = { 
+  screen_name: "不停跳",
+  source: 2442636523,
+  access_token: "2.00ZBLjNCR2D_fC8503c0c526b1L5EC",
+};
 // api interfaces
 var api = {
-  account: { 
-    screen_name: "不停跳",
-    source: 2442636523,
-    access_token: "2.00ZBLjNCR2D_fC8503c0c526b1L5EC",
-  },
   baseUrl: "https://api.weibo.com/2/",
   user_tweets: {
     url: "statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
     param: {
+      screen_name: account.screen_name,
+      source: account.source,
+      access_token: account.access_token,
       count: 10,                  // returned  number of tweets
       since_id: 0
       //trim_user: 1
     }
   },
 
-  get_tweet:  { url: "statuses/show.json" },    // get a tweet by id   
-  get_user:  { url: "users/show.json" }    // get a tweet by id   
+  get_tweet:  {    // get a tweet by id
+    url: "statuses/show.json", 
+    param: {
+      source: account.source,
+      access_token: account.access_token
+    }
+  },
+  get_user:  { url: "users/show.json" }    // get user by id   
 
 };
 
@@ -50,7 +59,10 @@ module.exports = {
   // get a tweet by tweet id
   getTweetById: function(id, callback) {
     get(generateUrl('get_tweet', {id: id}), function(err, data) { 
-      if (err) { return;}
+      if (err) { 
+        callback(err, null);
+        return;
+      }
       callback(null,data);
     });
 
@@ -82,13 +94,13 @@ function get(url, callback) {
     })
   }).on('error', function(e) {
     console.log("Got error: " + e.message);
-    callback(e);
+    callback(e, null);
   });
 }
 
 
 function generateUrl(method, option) {
-  var param = extend({}, api.account, api[method].param, option);
+  var param = extend({}, api[method].param, option);
 
   if (param.uid && param.screen_name) {
     delete param.screen_name;

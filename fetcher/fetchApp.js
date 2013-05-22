@@ -4,6 +4,7 @@
 
 var fs = require('fs');
 var api = require('./api');
+var async = require('async');
 var model = require('../app/model')();
 
 process.on('SIGTERM', function() {
@@ -14,12 +15,47 @@ process.on('exit', function() {
   console.log('worker quiting...');
 });
 
-function worker() {
+function fetchWorker() {
   fetcher();
-  setTimeout(worker, 60000);
+  setTimeout(fetchWorker, 60*1000);
 }
 
-worker();
+
+fetchWorker();
+check();
+
+function check() {
+  model.Tweet.find({status: 0})
+    .select('tid')
+    .exec(function(err, tweets) {
+    // body...
+      console.log('number:' + tweets.length);
+      function done(results) {
+        console.log('done...');
+        setTimeout(check, 60*1000);
+      }
+
+      function update_status (err, response, tweet) {
+        // body...
+        console.log('begin update...');
+        if (response.error) {
+          // (response.error_code == 20132) ||
+          // (response.error_code == 20135)) {
+          model.Tweet.update({tid: tweet.tid},
+              {status: 1}, function() {});
+          console.log(tweet.tid + ' unavailabe');
+        } else {
+          console.log(tweet.tid + ' status ok');
+        }
+      }
+
+      async.eachSeries(tweets, function(tweet, cb) {
+        setTimeout(function() {
+          api.getTweetById(tweet.tid, function(err, data) {update_status(err, data, tweet); cb();});
+        }, 1000);
+      }, done);
+  });
+}
 
 function fetcher() {
   readUsers(fetchTweets);
@@ -58,13 +94,13 @@ function fetchTweets(user) {
     });
 
     for (var i = 0; i < tweets.length; i++) {
-      saveTweet(tweets[i]);
+      saveTweet(tweets[i], false);
     };
   });
 }
 
 
-function saveTweet(tweet) {
+function saveTweet(tweet, retweet) {
   var origin_tweet = tweet.retweeted_status;
   var uid = 0;
   var name = '';
@@ -78,6 +114,8 @@ function saveTweet(tweet) {
   // create must have a callback function
   model.Tweet.create({
     tid: tweet.id,
+    status: 0,
+    retweet: retweet,
     create_at: (new Date(tweet.created_at)).valueOf(),
     text: tweet.text,
     origin_pic_url: tweet.original_pic || '', 
@@ -94,7 +132,7 @@ function saveTweet(tweet) {
   });
 
   if (origin_tweet) {
-    saveTweet(origin_tweet);
+    saveTweet(origin_tweet, true);
   }
 }
 

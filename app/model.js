@@ -25,6 +25,7 @@ module.exports = function(url) {
   });
   model.Tweet = mongoose.model('Tweet', {
     tid: Number,
+    retweet: Boolean, /* true/false: tweet is retweeted and not owned by a user in database */
     status: Number, /* 0 - normal; 1 - filtered by weibo; 2 - other */
     create_at: Number,
     text: String,

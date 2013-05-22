@@ -15,8 +15,7 @@ module.exports = {
   index: function(req, res) {
     if (req.xhr) {
       if (req.query.tweet) {
-        Tweet.find().where('origin_tweetid')
-        .equals(0)
+        Tweet.find({})
         .sort('-create_at')
         .exec(function(err, tweets) {
           if (err) {
@@ -34,7 +33,6 @@ module.exports = {
             console.log(err.message);
             res.send({ err: err});
           } else {
-            console.log(users);
             res.json(users);
           }
         });
@@ -45,32 +43,6 @@ module.exports = {
         title: "recent tweets",
         tweet_tmpl: tweet_tmpl,
         user_tmpl: user_tmpl
-      });
-    }
-  },
-
-  // POST :get tweets or users on page loading
-  initData: function(req, res) {
-    // get tweets
-    if (req.tweet) {
-      Tweet.find(function(err, tweets) {
-        if (err) {
-          console.log(err.message);
-          res.send({ err: err});
-        } else {
-          res.send({tweets: tweets});
-        }
-      });
-    }
-    // get users
-    if (req.user) {
-      User.find(function(err, users) {
-        if (err) {
-          console.log(err.message);
-          res.send({ err: err});
-        } else {
-          res.send({users: users});
-        }
       });
     }
   },
@@ -113,7 +85,7 @@ module.exports = {
               friends_cnt: user.friends_count,
               tweets_cnt: user.statuses_count
             });
-            newuser.save(function () { res.send({user: newuser}); });
+            newuser.save(function (err, user) { res.send({user: user}); });
           }
         });
       } else {
