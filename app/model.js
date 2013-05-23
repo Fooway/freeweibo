@@ -32,7 +32,7 @@ module.exports = function(url) {
     user_id: Number,
     user_name: String,
     origin_pic_url: String,
-    pic_local_path: String,
+    pic_name: String,
     origin_tweetid: Number,
     comments_count: Number,
     reposts_count: Number,

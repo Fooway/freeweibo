@@ -38,9 +38,9 @@ function check() {
       function update_status (err, response, tweet) {
         // body...
         console.log('begin update...');
-        if (response.error) {
-          // (response.error_code == 20132) ||
-          // (response.error_code == 20135)) {
+        if ((response.error) &&(
+           (response.error_code == 20132) ||
+           (response.error_code == 20135))) {
           model.Tweet.update({tid: tweet.tid},
               {status: 1}, function() {});
           console.log(tweet.tid + ' unavailabe');
@@ -112,23 +112,25 @@ function saveTweet(tweet, retweet) {
     var name = tweet.user.screen_name;
   }
   // create must have a callback function
-  model.Tweet.create({
-    tid: tweet.id,
-    status: 0,
-    retweet: retweet,
-    create_at: (new Date(tweet.created_at)).valueOf(),
-    text: tweet.text,
-    origin_pic_url: tweet.original_pic || '', 
-    user_id: uid,
-    user_name: name,
-    pic_local_path: tweet.original_pic,
-    origin_tweetid:  (origin_tweet?origin_tweet.id:0),
-    comments_count: tweet.comments_count,
-    reposts_count: tweet.reposts_count
-  }, function(err, tweet) {
-    if (err) {
-      console.log('save err!');
-    }
+  api.getImage(tweet, function(err, image_name) {
+    model.Tweet.create({
+      tid: tweet.id,
+      status: 0,
+      retweet: retweet,
+      create_at: (new Date(tweet.created_at)).valueOf(),
+      text: tweet.text,
+      origin_pic_url: tweet.original_pic || '', 
+      user_id: uid,
+      user_name: name,
+      pic_name: image_name,
+      origin_tweetid:  (origin_tweet?origin_tweet.id:0),
+      comments_count: tweet.comments_count,
+      reposts_count: tweet.reposts_count
+    }, function(err, tweet) {
+      if (err) {
+        console.log('save err!');
+      }
+    });
   });
 
   if (origin_tweet) {

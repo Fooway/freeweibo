@@ -2,7 +2,11 @@ li
   h5= tweet.user_name
   h5= tweet.create_at
   p= tweet.text
-  - if (tweet.origin_pic_url)
-  img(src=tweet.origin_pic_url)
+  - if (tweet.pic_name != '') {
+  img(src='/images/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')
+  img(src='/images/' + tweet.pic_name + '_middle.jpg', class='middle_img')
+  br
+  a(href='/images/' + tweet.pic_name + '_large.jpg') 查看大图
+  - }
   h6 转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
 

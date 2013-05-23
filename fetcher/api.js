@@ -5,8 +5,11 @@
 
 var fs = require('fs');
 var https = require('https');
+var request = require('request');
 var querystring = require('querystring');
 var extend = require('extend');
+var async = require('async');
+var path = require('path');
 
 var account = { 
   screen_name: "不停跳",
@@ -74,12 +77,47 @@ module.exports = {
       if (err) { return;}
       callback(null,data);
     });
+  },
+
+  getImage: function(tweet, callback) {
+    if (tweet.original_pic) {
+      var regex = /\/([^\/]+)\.[\w]+$/;
+      var base_name = regex.exec(tweet.original_pic)[1];
+      var image_path = path.normalize(path.join(__dirname, '../public/images/',base_name));
+      var files = []; 
+
+      callback(null, base_name);
+
+      files.push({
+        local:image_path + '_thumb.jpg', 
+        remote: tweet.original_pic.replace('large', 'thumbnail')
+      });
+      files.push({
+        local:image_path + '_middle.jpg', 
+        remote: tweet.original_pic.replace('large', 'bmiddle')
+      });
+      files.push({
+        local:image_path + '_large.jpg', 
+        remote: tweet.original_pic
+      });
+
+      async.map(files, function(item, cb) {
+        request(item.remote).pipe(fs.createWriteStream(item.local));
+        cb();
+      }, function(results) {
+        console.log('file ' + base_name + 'save done!');
+      });
+
+    } else {
+      callback(null, '');
+    }
+
   }
 };
 
 // request api function
 function get(url, callback) {
-  console.log('GET: ' + url);
+  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
   https.get(url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });

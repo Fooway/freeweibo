@@ -10,6 +10,7 @@
     "jade": "*",
     "stylus": "0.32.0",
     "extend":"*",
+    "request": "*",
     "mongoose":"*"
   }
 }

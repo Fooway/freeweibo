@@ -21,17 +21,30 @@ $(function () {
     console.log(name);
     if (name) {
       $.post('/add', {name: name}, function(data) {
-        if (data && data.hasOwnProperty('user')) {
-          insertUser(user);
+        if (data && data.user) {
+          insertUser(data.user);
         }
-        if (data && data.hasOwnProperty('err')) {console.log(err); }
+        if (data && data.err) {console.log(err); }
       });
     }
   });
 
+  $('.tweets').on('click', '.thumb_img', function() {
+    $(this).hide();
+    $(this).next().show();
+  });
+
+  $('.tweets').on('click', '.middle_img', function() {
+    $(this).hide();
+    $(this).prev().show();
+  });
+
   function insertTweet(tweet) {
     tweet.create_at = (new Date(tweet.create_at)).toLocaleString();
-    $('.tweets').append(tweetTmp({tweet: tweet}));
+    var $tweet = $(tweetTmp({tweet: tweet})).appendTo('.tweets');
+    if (tweet.status) {
+      $tweet.addClass('filtered');
+    }
   }
 
   function insertUser(user) {
