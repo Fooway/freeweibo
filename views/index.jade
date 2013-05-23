@@ -1,17 +1,30 @@
 extends layout
 
 block content
-  .wrapper  
-    h1= title
-    .left-pane
-      ul.tweets
+  .container
+    .header
+      a= title
+      .input-append
+        input.input-medium(type="text", placeholder="电子邮箱")
+        .btn-group
+          button.btn 订阅
+          button.btn.dropdown-toggle(data-toggle="dropdown")
+            span.caret
+          ul.dropdown-menu
+            li 取消
+      .clear
+    .row-fluit
+      .span8
+        ul.tweets
+      .span3
+        .input-append
+          input(type='text', id='tweeter_name', placeholder='微博昵称')
+          button.btn(id='add_tweeter') 加入
+        ul.users
 
-    .right-pane
-      form
-        input(type='text', id='tweeter_name')
-        input(id='add_tweeter', type='button', value='Add')
-      .users
-    script#tweet-template(type='template')
-      !{ tweet_tmpl }
-    script#user-template(type='template')
-      !{ user_tmpl }
+
+  script#tweet-template(type='template')
+    !{ tweet_tmpl }
+  script#user-template(type='template')
+    !{ user_tmpl }
+

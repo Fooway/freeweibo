@@ -1,4 +1,7 @@
-a(href='/user/' + user.uid)  
-  img(src= user.img_url)
-  #{ user.name }
-  span 粉丝 #{user.followers_cnt} | 关注 #{user.friends_cnt} | 微博 #{user.tweets_cnt}
+li
+  .media
+    img.pull-left(src=user.img_url)
+    .media-body
+      h5.media-heading=  user.name
+      p
+        span 粉丝 #{user.followers_cnt} | 关注 #{user.friends_cnt} | 微博 #{user.tweets_cnt}

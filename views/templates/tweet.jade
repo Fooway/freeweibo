@@ -1,12 +1,16 @@
 li
-  h5= tweet.user_name
-  h5= tweet.create_at
-  p= tweet.text
-  - if (tweet.pic_name != '') {
-  img(src='/images/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')
-  img(src='/images/' + tweet.pic_name + '_middle.jpg', class='middle_img')
-  br
-  a(href='/images/' + tweet.pic_name + '_large.jpg') 查看大图
-  - }
-  h6 转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
+  .media
+    img.pull-left(src=tweet.user_img)
+    .media-body
+      h5.media-heading= tweet.user_name
+      p= tweet.text
+      - if (tweet.pic_name != '') {
+      img.img-polaroid(src='/images/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')
+      img.img-polaroid(src='/images/' + tweet.pic_name + '_middle.jpg', class='middle_img')
+      br
+      a(href='/images/' + tweet.pic_name + '_large.jpg') 查看大图
+      - }
+      p 
+        span.time #{tweet.create_at} 
+        转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
 

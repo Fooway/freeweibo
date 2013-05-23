@@ -41,7 +41,7 @@ module.exports = {
     }
     else {
       res.render('index', { 
-        title: "recent tweets",
+        title: "FilterBack",
         tweet_tmpl: tweet_tmpl,
         user_tmpl: user_tmpl
       });
