@@ -38,7 +38,14 @@ var api = {
       access_token: account.access_token
     }
   },
-  get_user:  { url: "users/show.json" }    // get user by id   
+
+  get_user:  {    // get user by id
+    url: "users/show.json" ,
+    param: {
+      source: account.source,
+      access_token: account.access_token
+    }
+  }    
 
 };
 
@@ -125,7 +132,7 @@ function get(url, callback) {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      //console.log(buffer.toString());
+      console.log(buffer.toString());
 
       callback(null, data);
       buffer = [];
