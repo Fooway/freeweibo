@@ -105,7 +105,7 @@ module.exports = {
         request(item.remote).pipe(fs.createWriteStream(item.local));
         cb();
       }, function(results) {
-        console.log('file ' + base_name + 'save done!');
+        console.log('file ' + base_name + ' save done!');
       });
 
     } else {

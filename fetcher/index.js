@@ -5,25 +5,18 @@
 var fs = require('fs');
 var api = require('./api');
 var async = require('async');
-var model = require('../app/model')();
 
-process.on('SIGTERM', function() {
-  process.exit();
-});
+// mongodb model
+var model = {};
 
-process.on('exit', function() {
-  console.log('worker quiting...');
-});
-
-function fetchWorker() {
-  fetcher();
-  setTimeout(fetchWorker, 60*1000);
+fetcher = module.exports = function (db) {
+  if (!db) { return; }
+  model = db;
+  fetch();
+  check();
 }
 
-
-fetchWorker();
-check();
-
+// check all the tweets' status in db.
 function check() {
   model.Tweet.find({status: 0})
     .select('tid')
@@ -32,7 +25,7 @@ function check() {
       console.log('number:' + tweets.length);
       function done(results) {
         console.log('done...');
-        setTimeout(check, 60*1000);
+        setTimeout(check, 30*60*1000);
       }
 
       function update_status (err, response, tweet) {
@@ -50,32 +43,38 @@ function check() {
       }
 
       async.eachSeries(tweets, function(tweet, cb) {
+        // need to delay 1s for each tweet
+        // so we will not exceed the api access frequency
+        // otherwise, weibo will block our access temporarily
         setTimeout(function() {
-          api.getTweetById(tweet.tid, function(err, data) {update_status(err, data, tweet); cb();});
+          api.getTweetById(tweet.tid, function(err, data) {
+            update_status(err, data, tweet); cb();
+          });
         }, 1000);
       }, done);
   });
 }
 
-function fetcher() {
-  readUsers(fetchTweets);
-}
-
-function readUsers(callback) {
-  // body...
+// fetch tweets for users
+function fetch() {
   model.User.find(function(err, users) {
     if (err) {
       console.log(err.message);
       return;
     }
-    for (var i = 0; i < users.length; i++) {
-      callback(users[i]);
-    };
+    async.eachSeries(users, function(user, cb) {
+      setTimeout(function() { 
+        fetchTweets(user);
+        cb();
+      }, 1000);
+    }, function(results) {
+      setTimeout(fetch, 3*60*1000);
+    });
   });
 }
 
+// api get wrapper for getting user's latest tweets
 function fetchTweets(user) {
-  // body...
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets || !tweets.length) { 
       if (err) {
@@ -107,7 +106,7 @@ function saveTweet(tweet, retweet) {
 
   if (!tweet) return;
 
-  if (tweet.hasOwnProperty('user')) {
+  if (tweet.user) {
     var uid = tweet.user.id;
     var name = tweet.user.screen_name;
   }

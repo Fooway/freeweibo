@@ -8,24 +8,9 @@ var http = require('http');
 var path = require('path');
 var controller = require('./app/controller');
 
-// fork worker and redirect output stream
-var worker = require('child_process').fork(path.join(__dirname, 'fetcher/fetchApp.js'));
+// first, boot fetcher
+require('./fetcher')(controller.db);
 
-process.on('uncaughtException', function(e) {
-  console.log('uncaught exception:');
-  console.log(e);
-  process.exit();
-});
-
-process.on('SIGTERM', function() {
-  console.log('received SIGTERM...');
-  process.exit();
-}); 
-
-process.on('exit', function() {
-  console.log('exiting...killing worker');
-  worker.kill();
-});
 
 var app = express();
 

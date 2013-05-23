@@ -10,6 +10,7 @@ var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/
 
 
 module.exports = {
+  db: model,
   
   // GET: [/]
   index: function(req, res) {
