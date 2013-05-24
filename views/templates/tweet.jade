@@ -3,14 +3,16 @@ li
     img.pull-left(src=tweet.user_img)
     .media-body
       h5.media-heading= tweet.user_name
-      p= tweet.text
-      - if (tweet.pic_name != '') {
-      img.img-polaroid(src='/images/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')
-      img.img-polaroid(src='/images/' + tweet.pic_name + '_middle.jpg', class='middle_img')
-      br
-      a(href='/images/' + tweet.pic_name + '_large.jpg') 查看大图
-      - }
-      p 
+      p #{tweet.text}
+        - if (tweet.pic_name != '') {
+          br
+          img.img-polaroid(src='/images/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')
+          img.img-polaroid(src='/images/' + tweet.pic_name + '_middle.jpg', class='middle_img')
+        - }
+      p.tail 
+        - if (tweet.pic_name != '') {
+          a(href='/images/' + tweet.pic_name + '_large.jpg') 查看大图
+        - }
         span.time #{tweet.create_at} 
         转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
 

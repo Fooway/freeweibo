@@ -1,0 +1,55 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  padding: 50px;
+  font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+body .media .pull-left {
+  margin-top: 5px;
+}
+body .media .media-body .tail {
+  font-size: 12px;
+}
+body .media .media-body .tail a {
+  margin-right: 40px;
+}
+body .media .media-body .tail .time {
+  margin-right: 40px;
+}
+body .header {
+  margin-bottom: 40px;
+  border-bottom: 2px solid #bbb;
+}
+body .header a {
+  font-size: 25px;
+  font-weight: bold;
+  line-height: 37px;
+  text-decoration: none;
+}
+body .header .clear {
+  clear: both;
+}
+body .header .input-append {
+  float: right;
+}
+body .tweets {
+  margin: 0;
+}
+body .tweets li {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+body .tweets li .media-body img {
+  margin-top: 5px;
+}
+body .tweets .filtered {
+  background-color: #ccc;
+}
+body .tweets .middle_img {
+  display: none;
+}
+body .span3 {
+  float: right;
+}

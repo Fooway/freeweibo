@@ -6,11 +6,12 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var controller = require('./app/controller');
+var fetcher = require('./fetcher');
+var config = require('./config');
+var controller = require('./app/controller')(fetcher);
 
 // first, boot fetcher
-require('./fetcher')(controller.db);
-
+fetcher.init(controller.db, config);
 
 var app = express();
 
@@ -37,7 +38,7 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', controller.index);
-app.get('/user/:id', controller.user);
+app.post('/', controller.initData);
 app.post('/add', controller.add);
 app.post('/subscribe', controller.subscribe);
 

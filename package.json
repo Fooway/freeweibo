@@ -12,6 +12,7 @@
     "async": "*",
     "extend":"*",
     "request": "*",
+    "debug": "*",
     "mongoose":"*"
   }
 }

@@ -10,6 +10,7 @@ var querystring = require('querystring');
 var extend = require('extend');
 var async = require('async');
 var path = require('path');
+var debug = require('debug')('api');
 
 var account = { 
   screen_name: "不停跳",
@@ -49,82 +50,100 @@ var api = {
 
 };
 
-module.exports = {
-  // get user's tweets by user
-  getUserTweets: function(option /* id or name */, callback) {
-    if (typeof option == 'function') {
-      callback = option;
-      option = {};
-    }
-    get(generateUrl('user_tweets', option), function(err, data) { 
-      if (err || !data.statuses)  {
-        callback(err);
-        console.log(data);
-        return;
-      }
-      callback(null, data.statuses);
-    });
-  },
+module.exports = function() {
 
-  // get a tweet by tweet id
-  getTweetById: function(id, callback) {
-    get(generateUrl('get_tweet', {id: id}), function(err, data) { 
-      if (err) { 
-        callback(err, null);
-        return;
-      }
-      callback(null,data);
-    });
+ var imagePath = function(basename) {
+    var image_path = path.normalize(path.join(__dirname, '../public/images/', base_name));
+    var files = [];
 
-  },
+    files.push(image_path + '_thumb.jpg');
+    files.push(image_path + '_middle.jpg');
+    files.push(image_path + '_large.jpg');
 
-  // get user info by screen_name
-  getUser: function(name, callback) {
-    get(generateUrl('get_user', {screen_name: name}), function(err, data) { 
-      if (err) { return;}
-      callback(null,data);
-    });
-  },
+    return files;
+  };
 
-  getImage: function(tweet, callback) {
-    if (tweet.original_pic) {
-      var regex = /\/([^\/]+)\.[\w]+$/;
-      var base_name = regex.exec(tweet.original_pic)[1];
-      var image_path = path.normalize(path.join(__dirname, '../public/images/',base_name));
-      var files = []; 
+  
+ return {
+   // get user's tweets by user
+   getUserTweets: function(option /* id or name */, callback) {
+     if (typeof option == 'function') {
+       callback = option;
+       option = {};
+     }
+     get(generateUrl('user_tweets', option), function(err, data) { 
+       if (err || !data.statuses)  {
+         callback(err);
+         return;
+       }
+       callback(null, data.statuses);
+     });
+   },
 
-      callback(null, base_name);
+     // get a tweet by tweet id
+     getTweetById: function(id, callback) {
+       get(generateUrl('get_tweet', {id: id}), function(err, data) { 
+         if (err) { 
+           callback(err, null);
+           return;
+         }
+         callback(null,data);
+       });
 
-      files.push({
-        local:image_path + '_thumb.jpg', 
-        remote: tweet.original_pic.replace('large', 'thumbnail')
-      });
-      files.push({
-        local:image_path + '_middle.jpg', 
-        remote: tweet.original_pic.replace('large', 'bmiddle')
-      });
-      files.push({
-        local:image_path + '_large.jpg', 
-        remote: tweet.original_pic
-      });
+     },
 
-      async.map(files, function(item, cb) {
-        request(item.remote).pipe(fs.createWriteStream(item.local));
-        cb();
-      }, function(results) {
-        console.log('file ' + base_name + ' save done!');
-      });
+     // get user info by screen_name or uid
+     getUserInfo: function(option, callback) {
+       get(generateUrl('get_user', option), function(err, data) { 
+         if (err) { 
+           callback(err);
+           return;
+         }
+         callback(null,data);
+       });
+     },
 
-    } else {
-      callback(null, '');
-    }
+     getImage: function(tweet, callback) {
+       if (tweet.original_pic) {
+         var regex = /\/([^\/]+)\.[\w]+$/;
+         var base_name = regex.exec(tweet.original_pic)[1];
+         var local_path = imagePath(base_name);
+         var files = []; 
 
-  }
+         callback(null, base_name);
+
+         files.push({
+           local: local_path[0], 
+           remote: tweet.original_pic.replace('large', 'thumbnail')
+         });
+         files.push({
+           local: local_path[1],
+           remote: tweet.original_pic.replace('large', 'bmiddle')
+         });
+         files.push({
+           local: local_path[2],
+           remote: tweet.original_pic
+         });
+
+         async.map(files, function(item, cb) {
+           request(item.remote).pipe(fs.createWriteStream(item.local));
+           cb();
+         }, function(results) {
+           console.log('file ' + base_name + ' save done!');
+         });
+
+       } else {
+         callback(null, '');
+       }
+
+     },
+     imagePath: imagePath
+ }
 };
 
 // request api function
 function get(url, callback) {
-  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
+  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
   https.get(url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
@@ -132,13 +151,13 @@ function get(url, callback) {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      console.log(buffer.toString());
+      debug(buffer.toString());
 
       callback(null, data);
       buffer = [];
     })
   }).on('error', function(e) {
-    console.log("Got error: " + e.message);
+    debug('error: ' + e);
     callback(e, null);
   });
 }

@@ -6,8 +6,18 @@ body
   padding: 50px
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif
 
-  .header
+  .media
+    .pull-left
+      margin-top: 5px
+    .media-body
+      .tail
+        font-size: 12px
+        a
+          margin-right: 40px
+        .time
+          margin-right: 40px
 
+  .header
     margin-bottom: 40px
     border-bottom: 2px solid #bbb
     a
@@ -20,14 +30,22 @@ body
       
     .input-append 
       float: right
+
   .tweets
+    margin: 0
     li
       margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
-    .time
-      margin-right: 20px
+      .media-body
+        img
+          margin-top: 5px
+        
+
     .filtered
       background-color: #ccc
     .middle_img
       display: none
+
+  .span3
+    float: right
 

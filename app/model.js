@@ -1,13 +1,15 @@
 // create user and tweet model
 var mongoose = require('mongoose');
 mongoose.set('debug', true);
+
+
 module.exports = function(url) {
   var model = {};
 
   var db = mongoose.connect(url || 'mongodb://localhost/test');
   console.log('mongodb connected...');
   mongoose.connection.on('error', function() {
-    console.log('connection err');
+    console.log('connection err...');
   });
 
   // setup model
@@ -23,6 +25,7 @@ module.exports = function(url) {
     friends_cnt: Number,
     tweets_cnt: Number
   });
+
   model.Tweet = mongoose.model('Tweet', {
     tid: Number,
     retweet: Boolean, /* true/false: tweet is retweeted and not owned by a user in database */
@@ -30,6 +33,7 @@ module.exports = function(url) {
     create_at: Number,
     text: String,
     user_id: Number,
+    user_img: String,
     user_name: String,
     origin_pic_url: String,
     pic_name: String,
