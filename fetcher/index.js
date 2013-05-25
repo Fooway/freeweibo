@@ -47,7 +47,7 @@ function check() {
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
-    .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000);
+    .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
     .select('tid')
     .exec(function(err, tweets) {
       function done(results) {
@@ -136,58 +136,55 @@ function fetchTweets(user, callback) {
     });
 
     callback();
-    async.each(tweets, function(tweet, cb){
-      model.Tweet.find({tid: tweet.id}, function(err, old) {
-        if (err || old.length == 0) {
-          saveTweet(tweet, false);
-        } else {
-          debug('tweet [' + tweet.id + '] already exists, skip!');
-        }
-        cb();
-      });
+    async.each(tweets, function(tweet, cb){ 
+      saveTweet(tweet);
+      cb();
     }, function(results){});
   });
 }
 
 
-function saveTweet(tweet, retweet) {
-  var origin_tweet = tweet.retweeted_status;
+function saveTweet(tweet) {
   var uid = 0;
   var name = '';
 
   if (!tweet) return;
+  if (tweet.retweeted_status) {
+    tweet = tweet.retweeted_status;
+  }
 
   if (tweet.user) {
     var uid = tweet.user.id;
     var name = tweet.user.screen_name;
     var img = tweet.user.profile_image_url;
   }
-  // create must have a callback function
-  api.getImage(tweet, function(err, image_name) {
-    model.Tweet.create({
-      tid: tweet.id,
-      status: 0,
-      retweet: retweet,
-      create_at: (new Date(tweet.created_at)).valueOf(),
-      text: tweet.text,
-      origin_pic_url: tweet.original_pic || '', 
-      user_id: uid,
-      user_name: name,
-      user_img: img,
-      pic_name: image_name,
-      origin_tweetid:  (origin_tweet?origin_tweet.id:0),
-      comments_count: tweet.comments_count,
-      reposts_count: tweet.reposts_count
-    }, function(err, tweet) {
-      if (err) {
-        debug('error: ' + err);
-      }
-    });
-  });
 
-  if (origin_tweet) {
-    saveTweet(origin_tweet, true);
-  }
+  model.Tweet.find({tid: tweet.id}, function(err, old) {
+    if (err || old.length == 0) {
+      api.getImage(tweet, function(err, image_name) {
+
+        model.Tweet.create({
+          tid: tweet.id,
+          status: 0,
+          create_at: (new Date(tweet.created_at)).valueOf(),
+          text: tweet.text,
+          origin_pic_url: tweet.original_pic || '', 
+          user_id: uid,
+          user_name: name,
+          user_img: img,
+          pic_name: image_name,
+          comments_count: tweet.comments_count,
+          reposts_count: tweet.reposts_count
+        }, function(err, tweet) {
+          if (err) {
+            debug('error: ' + err);
+          }
+        });
+      });
+    } else {
+      debug('tweet [' + tweet.id + '] already exists, skip!');
+    }
+  });
 }
 
 function deleteOld() {

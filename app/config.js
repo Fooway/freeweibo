@@ -3,7 +3,7 @@ var config = module.exports = {
     fetch_interval_mins: 20,
     check_interval_mins: 67,
     delete_interval_days: 7,
-    api_request_interval_secs: 2,
+    api_request_interval_secs: 5,
     check_select_tweets_days: 4,
     follower_threshold: 400000
   },
