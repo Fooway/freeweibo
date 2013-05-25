@@ -53,13 +53,14 @@ var api = {
 module.exports = function() {
 
  var imagePath = function(basename) {
-    var image_path = path.normalize(path.join(__dirname, '../public/images/', base_name));
     var files = [];
+    if (basename) {
+      var image_path = path.normalize(path.join(__dirname, '../public/images/', base_name));
 
-    files.push(image_path + '_thumb.jpg');
-    files.push(image_path + '_middle.jpg');
-    files.push(image_path + '_large.jpg');
-
+      files.push(image_path + '_thumb.jpg');
+      files.push(image_path + '_middle.jpg');
+      files.push(image_path + '_large.jpg');
+    }
     return files;
   };
 

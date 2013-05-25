@@ -7,7 +7,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var fetcher = require('./fetcher');
-var config = require('./config');
+var config = require('./app/config');
 var controller = require('./app/controller')(fetcher);
 
 // first, boot fetcher
@@ -39,7 +39,6 @@ if ('development' == app.get('env')) {
 
 app.get('/', controller.index);
 app.post('/', controller.initData);
-app.post('/add', controller.add);
 app.post('/subscribe', controller.subscribe);
 
 http.createServer(app).listen(app.get('port'), function(){

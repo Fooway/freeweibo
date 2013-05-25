@@ -51,20 +51,6 @@ module.exports = function(fetcher) {
     }
   },
 
-  // POST: add a user to watch [/add]
-  add: function(req, res) {
-    var screen_name = req.param('name');
-    fetcher.fetchUser({screen_name: screen_name}, function(err, user) {
-      if (err) {
-        debug('fetch user failed!');
-        res.json([]);
-        return;
-      }
-      fetcher.fetchTweet(user);
-      res.json(user);
-    });
-  },
-
   // POST: subscribe email to tweets [/subscribe] TODO:
   subscribe: function(req, res) {
   }
