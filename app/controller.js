@@ -9,9 +9,8 @@ var tweet_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates
 var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'), {encoding: 'utf-8'});
 
 
-module.exports = function(fetcher) {
+module.exports = {
 
- return {
   db: model,
 
   // GET: [/]
@@ -54,5 +53,4 @@ module.exports = function(fetcher) {
   // POST: subscribe email to tweets [/subscribe] TODO:
   subscribe: function(req, res) {
   }
- };
-}
+};

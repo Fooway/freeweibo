@@ -55,7 +55,7 @@ module.exports = function() {
  var imagePath = function(basename) {
     var files = [];
     if (basename) {
-      var image_path = path.normalize(path.join(__dirname, '../public/images/', base_name));
+      var image_path = path.normalize(path.join(__dirname, '../public/images/tweets/', basename));
 
       files.push(image_path + '_thumb.jpg');
       files.push(image_path + '_middle.jpg');

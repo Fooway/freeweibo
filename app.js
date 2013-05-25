@@ -8,10 +8,10 @@ var http = require('http');
 var path = require('path');
 var fetcher = require('./fetcher');
 var config = require('./app/config');
-var controller = require('./app/controller')(fetcher);
+var controller = require('./app/controller');
 
 // first, boot fetcher
-fetcher.init(controller.db, config);
+fetcher(controller.db, config);
 
 var app = express();
 

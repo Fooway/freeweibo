@@ -23,72 +23,19 @@ function timeConfig(option) {
   (tmp = option.api_request_interval_secs) ? (API_REQUEST_INTERVAL_BY_SEC = tmp):null;
 }
 
-var fetcher = module.exports = {
-  init: function (db, config) {
-    if (!db) { return; }
-    model = db;
-    if (config) {
-      timeConfig(config.option);
-      tweeters = config.tweeters;
-    }
-
-    fetch();
-    check();
-  },
-
-  fetchTweet: fetchTweets,
-
-  fetchUser: function(option, cb) {
-    model.User.find(option, function(err, user) {
-      if (err) {
-        debug(err);
-        cb(err);
-        return;
-      }
-      if (!user.length) { 
-        option.screen_name = option.name;
-        delete option.name;
-        api.getUserInfo(option, function(err, user) {
-          if (err || user.error) {
-            var error = err || user.error;
-            debug(error);
-            cb(error);
-          } else {
-            if (user.followers_count > 1000000) {
-              debug('add ' + user.screen_name + ', has ' +
-                    user.followers_count + ' followers.');
-              var newuser = new model.User({
-                name: user.screen_name, 
-                uid: user.id,
-                img_url: user.profile_image_url,
-                latest_tid: 0,
-                location: user.location,
-                description: user.description,
-                gender: user.gender,
-                followers_cnt: user.followers_count,
-                friends_cnt: user.friends_count,
-                tweets_cnt: user.statuses_count
-              });
-              newuser.save(function (err, user) { 
-                if (err) {
-                  debug(err);
-                  cb(err);
-                } else {
-                  cb(null, newuser);
-                }
-              });
-            } else {
-              debug('ignore ' + user.screen_name + ', has ' +
-                    user.followers_count + ' followers.');
-            }
-          }
-        });
-      }
-      cb(null, user);
-    });
-
+var fetcher = module.exports = function (db, config) {
+  if (!db) { return; }
+  model = db;
+  if (config) {
+    timeConfig(config.option);
+    tweeters = config.tweeters;
   }
-}
+
+  fetch();
+  check();
+};
+
+
 
 // check all the tweets' status in db.
 function check() {
@@ -107,7 +54,7 @@ function check() {
           model.Tweet.update({tid: tweet.tid},
               {status: 1}, function() {});
           debug('tweet ' + tweet.tid + ' unavailabe');
-          fetcher.fetchUser({uid: tweet.user.id}, function(){});
+          fetchUser({uid: tweet.user.id}, function(){});
         } else {
           debug(tweet.tid + ' status ok');
           deleteOld(tweet);
@@ -144,7 +91,9 @@ function fetch() {
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
           debug('[ '+ (new Date()).toLocaleTimeString() + ' ] get user [' + tweeter + ']...');
-          fetcher.fetchUser({name: tweeter}, cb);
+          fetchUser({name: tweeter}, function() {
+            debug('Done at [ '+ (new Date()).toLocaleTimeString() + ' ]');
+            cb();});
         }, API_REQUEST_INTERVAL_BY_SEC * 1000);
       }, function() {
         setTimeout(fetch, 10 * 1000);
@@ -153,7 +102,9 @@ function fetch() {
     }
     async.eachSeries(users, function(user, cb) {
       setTimeout(function() { 
-        fetchTweets(user, cb);
+        fetchTweets(user, function() {
+          debug('Done at [ '+ (new Date()).toLocaleTimeString() + ' ]');
+          cb();});
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
     }, function(results) {
       setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
@@ -185,7 +136,7 @@ function fetchTweets(user, callback) {
     callback();
     async.each(tweets, function(tweet, cb){
       model.Tweet.find({tid: tweet.id}, function(err, old) {
-        if (err || old == []) {
+        if (err || old.length == 0) {
           saveTweet(tweet, false);
         } else {
           debug('tweet [' + tweet.id + '] already exists, skip!');
@@ -254,3 +205,45 @@ function deleteOld(tweet) {
   }
 }
 
+function fetchUser(option, cb) {
+  model.User.find(option, function(err, user) {
+    if (err) {
+      debug(err);
+      cb();
+      return;
+    }
+    if (!user.length) { 
+      option.screen_name = option.name;
+      delete option.name;
+      api.getUserInfo(option, function(err, user) {
+        if (err || user.error) {
+          var error = err || user.error;
+          debug(error);
+        } else {
+          if (user.followers_count > 1000000) {
+            debug('add ' + user.screen_name + ', has ' +
+                  user.followers_count + ' followers.');
+            var newuser = new model.User({
+              name: user.screen_name, 
+              uid: user.id,
+              img_url: user.profile_image_url,
+              latest_tid: 0,
+              location: user.location,
+              description: user.description,
+              gender: user.gender,
+              followers_cnt: user.followers_count,
+              friends_cnt: user.friends_count,
+              tweets_cnt: user.statuses_count
+            });
+            newuser.save(function (err, user) { if(err) debug(err);});
+            } else {
+              debug('ignore ' + user.screen_name + ', has ' +
+                    user.followers_count + ' followers.');
+            }
+          }
+        cb();
+      });
+    }
+  });
+
+}
