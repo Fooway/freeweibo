@@ -27,7 +27,7 @@ module.exports = {
     // get tweets
     if (req.param('tweet')) {
       Tweet.find({})
-        .limit(50)
+        .limit(70)
         .sort('-create_at')
         .exec(function(err, tweets) {
           if (err) {
