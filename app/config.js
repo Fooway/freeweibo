@@ -11,7 +11,7 @@ var config = module.exports = {
     '何炅',
     '谢娜',
     '张小娴',
-    '任志强'/*,
+    '任志强',
     '陈坤',
     '潘石屹',
     '袁裕来律师',
@@ -105,6 +105,6 @@ var config = module.exports = {
     '老徐时评',
     '何韵诗HOCC',
     '梁静茹',
-    '袁莉wsj',*/
+    '袁莉wsj'
   ]
 };
