@@ -1,10 +1,13 @@
 var config = module.exports = {
   option: {
-    fetch_interval_mins: 25,
-    check_interval_mins: 30,
-    delete_interval_days: 14,
-    api_request_interval_secs: 2
+    fetch_interval_mins: 20,
+    check_interval_mins: 67,
+    delete_interval_days: 7,
+    api_request_interval_secs: 2,
+    check_select_tweets_days: 4,
+    follower_threshold: 400000
   },
+
   tweeters: [
     '李开复',
     '薛蛮子',

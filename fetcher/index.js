@@ -10,10 +10,12 @@ var debug = require('debug')('fetcher');
 // mongodb model
 var model = {};
 var tweeters = [];
-var DELETE_INTERVAL_BY_DATE = 14;
-var FETCH_INTERVAL_BY_MINUTE = 15; 
-var CHECK_INTERVAL_BY_MINUTE = 30;
+var DELETE_INTERVAL_BY_DATE = 7;
+var FETCH_INTERVAL_BY_MINUTE = 20; 
+var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
+var CHECK_SELECT_TWEETS_DATE = 4;
+var FOLLOWER_THRESHOLD = 400000;
 
 function timeConfig(option) {
   var tmp;
@@ -21,6 +23,8 @@ function timeConfig(option) {
   (tmp = option.fetch_interval_mins) ? (FETCH_INTERVAL_BY_MINUTE = tmp):null;
   (tmp = option.check_interval_mins) ? (CHECK_INTERVAL_BY_MINUTE = tmp):null;
   (tmp = option.api_request_interval_secs) ? (API_REQUEST_INTERVAL_BY_SEC = tmp):null;
+  (tmp = option.check_select_tweets_days) ? (CHECK_SELECT_TWEETS_DATE= tmp):null;
+  (tmp = option.follower_threshold) ? (FOLLOWER_THRESHOLD = tmp):null;
 }
 
 var fetcher = module.exports = function (db, config) {
@@ -32,7 +36,8 @@ var fetcher = module.exports = function (db, config) {
   }
 
   fetch();
-  check();
+  setTimeout(check, 30 * 60 * 1000);
+  setTimeout(deleteOld, 12 * 60 * 60 * 1000);
 };
 
 
@@ -40,7 +45,9 @@ var fetcher = module.exports = function (db, config) {
 // check all the tweets' status in db.
 function check() {
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
+  var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
+    .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000);
     .select('tid')
     .exec(function(err, tweets) {
       function done(results) {
@@ -55,9 +62,6 @@ function check() {
               {status: 1}, function() {});
           debug('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user.id}, function(){});
-        } else {
-          debug(tweet.tid + ' status ok');
-          deleteOld(tweet);
         }
       }
 
@@ -91,9 +95,7 @@ function fetch() {
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
           debug('[ '+ (new Date()).toLocaleTimeString() + ' ] get user [' + tweeter + ']...');
-          fetchUser({name: tweeter}, function() {
-            debug('Done at [ '+ (new Date()).toLocaleTimeString() + ' ]');
-            cb();});
+          fetchUser({name: tweeter}, function() { cb();});
         }, API_REQUEST_INTERVAL_BY_SEC * 1000);
       }, function() {
         setTimeout(fetch, 10 * 1000);
@@ -188,21 +190,34 @@ function saveTweet(tweet, retweet) {
   }
 }
 
-function deleteOld(tweet) {
+function deleteOld() {
+  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start deleting old tweets...');
   var now = (new Date()).valueOf();
 
+  model.Tweet.find({status: 0})
+  .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
+  .select('tid image_name')
+  .exec(function(err, tweets) {
+    if (err) {
+      debug('error: ' + err);
+      setTimeout(deleteOld, 24*60*60*1000);
+    } else {
+      async.each(tweets, function(tweet, cb) {
+        model.Tweet.remove({tid: tweet.tid});
+        var files = api.imagePath(tweet.image_name);
 
-  if ((now - tweet.create_at) > DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000) {
-    var files = api.imagePath(tweet.image_name);
+        debug('deleting tweet: ' + tweet.tid);
 
-    debug('deleting tweet: ' + tweet.tid);
-
-    for (var i = 0; i < files.length; i++) {
-      debug('deleting ' + files[i]);
-      fs.unlink(files[i]);
-    };
-    model.Tweet.remove({tid: tweet.tid});
-  }
+        for (var i = 0; i < files.length; i++) {
+          debug('deleting ' + files[i]);
+          fs.unlink(files[i]);
+        };
+        cb();
+      }, function() { setTimeout(deleteOld, 24*60*60*1000);});
+    }
+    
+  });
+    
 }
 
 function fetchUser(option, cb) {
@@ -220,7 +235,7 @@ function fetchUser(option, cb) {
           var error = err || user.error;
           debug(error);
         } else {
-          if (user.followers_count > 400000) {
+          if (user.followers_count > FOLLOWER_THRESHOLD) {
             debug('add ' + user.screen_name + ', has ' +
                   user.followers_count + ' followers.');
             var newuser = new model.User({
