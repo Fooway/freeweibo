@@ -127,7 +127,11 @@ module.exports = function() {
          });
 
          async.map(files, function(item, cb) {
-           request(item.remote).pipe(fs.createWriteStream(item.local));
+           request(item.remote, function (error, response, body) {
+             if(error){
+               console.log('error: '+ error);
+             }
+           }).pipe(fs.createWriteStream(item.local));
            cb();
          }, function(results) {
            console.log('file ' + base_name + ' save done!');

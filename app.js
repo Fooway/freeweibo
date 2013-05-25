@@ -10,6 +10,15 @@ var fetcher = require('./fetcher');
 var config = require('./app/config');
 var controller = require('./app/controller');
 
+process.on('uncaughtException', function (e) {
+  console.log('EXCEPTION: ' + e);
+  //process.exit();
+});
+
+process.on('exit', function () {
+  console.log('process exiting...');
+});
+
 // first, boot fetcher
 fetcher(controller.db, config);
 

@@ -220,7 +220,7 @@ function fetchUser(option, cb) {
           var error = err || user.error;
           debug(error);
         } else {
-          if (user.followers_count > 1000000) {
+          if (user.followers_count > 400000) {
             debug('add ' + user.screen_name + ', has ' +
                   user.followers_count + ' followers.');
             var newuser = new model.User({

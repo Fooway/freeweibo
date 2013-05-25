@@ -1,9 +1,9 @@
 var config = module.exports = {
   option: {
-    fetch_interval_mins: 17,
-    check_interval_mins: 40,
+    fetch_interval_mins: 25,
+    check_interval_mins: 30,
     delete_interval_days: 14,
-    api_request_interval_secs: 4
+    api_request_interval_secs: 2
   },
   tweeters: [
     '李开复',
