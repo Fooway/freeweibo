@@ -12,7 +12,7 @@ var controller = require('./app/controller');
 
 process.on('uncaughtException', function (e) {
   console.log('EXCEPTION: ' + e);
-  //process.exit();
+  process.exit();
 });
 
 process.on('exit', function () {
