@@ -3,7 +3,8 @@ li
     img.pull-left(src=tweet.user_img)
     .media-body
       h5.media-heading= tweet.user_name
-      p #{tweet.text}
+      p.text 
+        span #{tweet.text}
         - if (tweet.pic_name != '') {
           br
           img.img-polaroid(src='/images/tweets/' + tweet.pic_name + '_thumb.jpg', class='thumb_img')

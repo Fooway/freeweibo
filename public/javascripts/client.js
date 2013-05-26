@@ -11,23 +11,9 @@ $(function () {
 
   $.post('/', {user: 1}, function(users) {
     for (var i = 0; i < users.length; i++) {
-      console.log(users[i]);
       insertUser(users[i]);
     };
   }, 'json');
-
-  $('#add_tweeter').on('click', function() {
-    var name = $('#tweeter_name').val();
-    console.log(name);
-    if (name) {
-      $.post('/add', {name: name}, function(data) {
-        if (data && data.user) {
-          insertUser(data.user);
-        }
-        if (data && data.err) {console.log(err); }
-      });
-    }
-  });
 
   $('.tweets').on('click', '.thumb_img', function() {
     $(this).hide();
@@ -41,7 +27,11 @@ $(function () {
 
   function insertTweet(tweet) {
     tweet.create_at = (new Date(tweet.create_at)).toLocaleString();
+
     var $tweet = $(tweetTmp({tweet: tweet})).appendTo('.tweets');
+    var $main_text = $tweet.find('.text > span');
+
+    $main_text.html($main_text.html().replace(/(http:\/\/[\/.\w]*)/g, '<a href="$1">$1</a>'));
     if (tweet.status) {
       $tweet.addClass('filtered');
     }
