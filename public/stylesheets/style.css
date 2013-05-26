@@ -47,8 +47,18 @@ body .tweets li .media-body img {
 body .tweets .filtered {
   background-color: #edd;
 }
+body .tweets .thumb_img:hover {
+  cursor: pointer;
+  cursor: -webkit-zoom-in;
+  cursor: -moz-zoom-in;
+}
 body .tweets .middle_img {
   display: none;
+}
+body .tweets .middle_img:hover {
+  cursor: pointer;
+  cursor: -webkit-zoom-out;
+  cursor: -moz-zoom-out;
 }
 body .span3 {
   float: right;
