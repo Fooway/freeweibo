@@ -136,7 +136,7 @@ function fetchTweets(user, callback) {
       }
     });
 
-    async.each(tweets, function(tweet, cb){ 
+    async.eachSeries(tweets, function(tweet, cb){ 
       saveTweet(tweet, cb);
     }, function(results){
       callback();
