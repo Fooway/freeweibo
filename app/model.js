@@ -15,7 +15,7 @@ module.exports = function(url) {
   // setup model
   model.User = mongoose.model('User',{
     name: {type: String, index: true},
-    uid: {type: Number, index: true};
+    uid: {type: Number, index: true},
     img_url: String,
     latest_tid: Number, // latested tweet id
     location: String,
