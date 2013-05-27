@@ -36,8 +36,6 @@ var fetcher = module.exports = function (db, config) {
   }
 
   fetch();
-  setTimeout(check, 30 * 60 * 1000);
-  setTimeout(deleteOld, 60 * 60 * 1000);
 };
 
 
@@ -52,6 +50,7 @@ function check() {
     .exec(function(err, tweets) {
       function done(results) {
         setTimeout(check, CHECK_INTERVAL_BY_MINUTE * 60 * 1000);
+        setTimeout(deleteOld, 60 * 60 * 1000);
       }
 
       function update_status (err, response, tweet) {
@@ -111,6 +110,7 @@ function fetch() {
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
     }, function(results) {
       setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
+      setTimeout(check,  5 * 1000);
     });
   });
 }
@@ -165,13 +165,22 @@ function saveTweet(tweet, cb) {
   }
 
   model.Tweet.find({tid: tweet.id}, function(err, old) {
+
     if (err || old.length == 0) {
       api.getImage(tweet, function(err, image_name) {
+
+        var time;
+        try {
+          time = new Date(tweet.created_at);
+        } catch(e) {
+          console.err(e);
+          time  = new Date();
+        }
 
         model.Tweet.create({
           tid: tweet.id,
           status: 0,
-          create_at: (new Date(tweet.created_at)).valueOf(),
+          create_at: time.valueOf(),
           text: tweet.text,
           origin_pic_url: tweet.original_pic || '', 
           user_id: uid,
@@ -180,11 +189,12 @@ function saveTweet(tweet, cb) {
           pic_name: image_name,
           comments_count: tweet.comments_count,
           reposts_count: tweet.reposts_count
-        }, function(err, tweet) {
+        }, function(err, newtweet) {
           if (err) {
-            console.error('error: ' + err);
+            console.error(err);
+          } else {
+            debug('tweet [' + newtweet.tid + '] save done!');
           }
-          debug('tweet [' + tweet.id + '] save done!');
           cb();
         });
       });
@@ -211,7 +221,7 @@ function deleteOld() {
   .select('tid image_name')
   .exec(function(err, tweets) {
     if (err) {
-      console.error('error: ' + err);
+      console.error(err);
       setTimeout(deleteOld, 1*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {

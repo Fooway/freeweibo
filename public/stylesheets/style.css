@@ -60,6 +60,6 @@ body .tweets .middle_img:hover {
   cursor: -webkit-zoom-out;
   cursor: -moz-zoom-out;
 }
-body .span3 {
+body .row-fluid .span3 {
   float: right;
 }
