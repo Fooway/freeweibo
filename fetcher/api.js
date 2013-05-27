@@ -129,12 +129,12 @@ module.exports = function() {
          async.map(files, function(item, cb) {
            request(item.remote, function (error, response, body) {
              if(error){
-               console.log('error: '+ error);
+               console.error('error: '+ error);
              }
            }).pipe(fs.createWriteStream(item.local));
            cb();
          }, function(results) {
-           console.log('file ' + base_name + ' save done!');
+           debug('file ' + base_name + ' save done!');
          });
 
        } else {
@@ -162,7 +162,7 @@ function get(url, callback) {
       buffer = [];
     })
   }).on('error', function(e) {
-    debug('error: ' + e);
+    console.error('error: ' + e);
     callback(e, null);
   });
 }

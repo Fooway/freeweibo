@@ -120,7 +120,7 @@ function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets || !tweets.length) { 
       if (err) {
-      debug(err);
+      console.error(err);
       } else {
         debug('no new tweet for ' + user.name);
       }
@@ -131,24 +131,28 @@ function fetchTweets(user, callback) {
     debug('fetched ' + tweets.length + ' tweets for ' + user.name);
     model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(err) {
       if (err) { 
-        debug(err.mesage);
+        console.error(err);
       }
     });
 
-    callback();
     async.each(tweets, function(tweet, cb){ 
-      saveTweet(tweet);
-      cb();
-    }, function(results){});
+      saveTweet(tweet, cb);
+    }, function(results){
+      callback();
+    });
   });
 }
 
 
-function saveTweet(tweet) {
+function saveTweet(tweet, cb) {
   var uid = 0;
   var name = '';
 
-  if (!tweet) return;
+  if (!tweet) {
+    cb();
+    return;
+  }
+  // only save original tweet
   if (tweet.retweeted_status) {
     tweet = tweet.retweeted_status;
   }
@@ -177,12 +181,15 @@ function saveTweet(tweet) {
           reposts_count: tweet.reposts_count
         }, function(err, tweet) {
           if (err) {
-            debug('error: ' + err);
+            console.error('error: ' + err);
           }
+          debug('tweet [' + tweet.id + '] save done!');
+          cb();
         });
       });
     } else {
       debug('tweet [' + tweet.id + '] already exists, skip!');
+      cb();
     }
   });
 }
@@ -196,7 +203,7 @@ function deleteOld() {
   .select('tid image_name')
   .exec(function(err, tweets) {
     if (err) {
-      debug('error: ' + err);
+      console.error('error: ' + err);
       setTimeout(deleteOld, 24*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
@@ -230,7 +237,7 @@ function fetchUser(option, cb) {
       api.getUserInfo(option, function(err, user) {
         if (err || user.error) {
           var error = err || user.error;
-          debug(error);
+          console.error(error);
         } else {
           if (user.followers_count > FOLLOWER_THRESHOLD) {
             debug('add ' + user.screen_name + ', has ' +

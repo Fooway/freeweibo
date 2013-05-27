@@ -14,8 +14,8 @@ module.exports = function(url) {
 
   // setup model
   model.User = mongoose.model('User',{
-    name: String,
-    uid: Number,
+    name: {type: String, index: true},
+    uid: {type: Number, index: true};
     img_url: String,
     latest_tid: Number, // latested tweet id
     location: String,
@@ -27,8 +27,8 @@ module.exports = function(url) {
   });
 
   model.Tweet = mongoose.model('Tweet', {
-    tid: Number,
-    status: Number, /* 0 - normal; 1 - filtered by weibo; 2 - other */
+    tid: {type: Number, index: true},
+    status: {type: Number, default: 0}, /* 0 - normal; 1 - filtered by weibo; 2 - other */
     create_at: Number,
     text: String,
     user_id: Number,
