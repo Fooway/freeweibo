@@ -56,7 +56,6 @@ module.exports = function() {
  var img_dir = ''; 
  var imagePath = function(basename) {
     var files = [];
-    var dir = 
     if (!img_dir) {
       img_dir = path.normalize(path.join(__dirname, '../public/images/tweets/'));
       mkdirp.sync(img_dir);
