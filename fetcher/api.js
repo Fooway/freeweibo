@@ -61,7 +61,7 @@ module.exports = function() {
       mkdirp.sync(img_dir);
     }
     if (basename) {
-      var image_path = path.normalize(img_dir, basename));
+      var image_path = path.normalize(path.join(img_dir, basename));
 
       files.push(image_path + '_thumb.jpg');
       files.push(image_path + '_middle.jpg');
