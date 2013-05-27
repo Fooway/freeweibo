@@ -10,7 +10,7 @@ var debug = require('debug')('fetcher');
 // mongodb model
 var model = {};
 var tweeters = [];
-var DELETE_INTERVAL_BY_DATE = 7;
+var DELETE_INTERVAL_BY_DATE = 5;
 var FETCH_INTERVAL_BY_MINUTE = 20; 
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
@@ -37,7 +37,7 @@ var fetcher = module.exports = function (db, config) {
 
   fetch();
   setTimeout(check, 30 * 60 * 1000);
-  setTimeout(deleteOld, 12 * 60 * 60 * 1000);
+  setTimeout(deleteOld, 60 * 60 * 1000);
 };
 
 
@@ -56,8 +56,9 @@ function check() {
 
       function update_status (err, response, tweet) {
         if ((response.error) &&(
-           (response.error_code == 20132) ||
-           (response.error_code == 20135))) {
+           (response.error_code == 20112) || //由于作者隐私设置，你没有权限查看此微博
+           (response.error_code == 20132) || //抱歉，该内容暂时无法查看。如需帮助，请联系客服
+           (response.error_code == 20135))) { //源微博已被删除
           model.Tweet.update({tid: tweet.tid},
               {status: 1}, function() {});
           debug('tweet ' + tweet.tid + ' unavailabe');
@@ -74,7 +75,7 @@ function check() {
           api.getTweetById(tweet.tid, function(err, data) {
             update_status(err, data, tweet); cb();
           });
-        }, API_REQUEST_INTERVAL_BY_SEC * 1000);
+        }, API_REQUEST_INTERVAL_BY_SEC * 3 * 1000);
       }, done);
   });
 }
@@ -198,13 +199,20 @@ function deleteOld() {
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start deleting old tweets...');
   var now = (new Date()).valueOf();
 
+  // first, remove all old tweets with no image
+  model.Tweet.find({status: 0})
+  .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
+  .where('pic_name').equals('')
+  .remove(function() {});
+
+  // then, remove all old tweets with image
   model.Tweet.find({status: 0})
   .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
   .select('tid image_name')
   .exec(function(err, tweets) {
     if (err) {
       console.error('error: ' + err);
-      setTimeout(deleteOld, 24*60*60*1000);
+      setTimeout(deleteOld, 1*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
         model.Tweet.remove({tid: tweet.tid});
@@ -217,7 +225,7 @@ function deleteOld() {
           fs.unlink(files[i]);
         };
         cb();
-      }, function() { setTimeout(deleteOld, 24*60*60*1000);});
+      }, function() { setTimeout(deleteOld, 2*60*60*1000);});
     }
     
   });

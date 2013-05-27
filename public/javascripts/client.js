@@ -39,7 +39,7 @@ $(function () {
     var $tweet = $(tweetTmp({tweet: tweet})).appendTo('.tweets');
     var $main_text = $tweet.find('.text > span');
 
-    $main_text.html($main_text.html().replace(/(http:\/\/[\/.\w]*)/g, '<a href="$1" target="_blank">$1</a>'));
+    $main_text.html($main_text.html().replace(/(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>'));
     if (tweet.status) {
       $tweet.addClass('filtered');
     }

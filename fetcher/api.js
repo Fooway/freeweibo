@@ -10,6 +10,7 @@ var querystring = require('querystring');
 var extend = require('extend');
 var async = require('async');
 var path = require('path');
+var mkdirp= require('mkdirp');
 var debug = require('debug')('api');
 
 var account = { 
@@ -52,10 +53,16 @@ var api = {
 
 module.exports = function() {
 
+ var img_dir = ''; 
  var imagePath = function(basename) {
     var files = [];
+    var dir = 
+    if (!img_dir) {
+      img_dir = path.normalize(path.join(__dirname, '../public/images/tweets/'));
+      mkdirp.sync(img_dir);
+    }
     if (basename) {
-      var image_path = path.normalize(path.join(__dirname, '../public/images/tweets/', basename));
+      var image_path = path.normalize(img_dir, basename));
 
       files.push(image_path + '_thumb.jpg');
       files.push(image_path + '_middle.jpg');
