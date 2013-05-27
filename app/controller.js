@@ -5,8 +5,8 @@ var debug = require('debug')('controller');
 var User = model.User;
 var Tweet = model.Tweet;
 
-var tweet_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'), {encoding: 'utf-8'});
-var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'), {encoding: 'utf-8'});
+//var tweet_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'), {encoding: 'utf-8'});
+//var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'), {encoding: 'utf-8'});
 
 
 module.exports = {
@@ -16,9 +16,9 @@ module.exports = {
   // GET: [/]
   index: function(req, res) {
     res.render('index', { 
-      title: "FilterBack",
-    tweet_tmpl: tweet_tmpl,
-    user_tmpl: user_tmpl
+      title: "FilterBack"//,
+    //tweet_tmpl: tweet_tmpl,
+    //user_tmpl: user_tmpl
     });
   },
 
