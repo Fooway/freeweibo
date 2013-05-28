@@ -42,7 +42,6 @@ var fetcher = module.exports = function (db, config) {
 
 // check all the tweets' status in db.
 function check() {
-  return; //temp disable for api access rate limit
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
@@ -83,7 +82,7 @@ function check() {
           api.getTweetById(tweet.tid, function(err, data) {
             update_status(err, data, tweet); cb();
           });
-        }, API_REQUEST_INTERVAL_BY_SEC * 3 * 1000);
+        }, API_REQUEST_INTERVAL_BY_SEC * 1000);
       }, done);
   });
 }
