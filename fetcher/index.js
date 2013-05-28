@@ -42,6 +42,7 @@ var fetcher = module.exports = function (db, config) {
 
 // check all the tweets' status in db.
 function check() {
+  return; //temp disable for api access rate limit
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
@@ -62,6 +63,14 @@ function check() {
               {status: 1}, function() {});
           debug('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user.id}, function(){});
+        }
+        if (response.id) {
+          model.Tweet.update(
+            { tid: tweet.tid }, 
+            {
+              reposts_count: response.reposts_count,
+              comments_count: response.comments_count
+            }, function(){});
         }
       }
 
