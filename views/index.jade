@@ -2,12 +2,7 @@ extends layout
 
 block content
   .container
-    .header
-      a= title
-      .input-append
-        input.input-medium(type="text", placeholder="电子邮箱")
-        button.btn(id='subscribe') 订阅
-      .clear
+    include header
     .row-fluid 
       .span8
         ul.tweets

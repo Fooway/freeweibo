@@ -9,6 +9,25 @@ $(function () {
     $('.users').css('cursor', 'wait');
   });
 
+  $('#subscribe').on('click', function () {
+    // body...
+    var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
+    var address = $('#mail').val().replace(/^\s+|\s+$/g,'');
+    if (pattern.test(address)) {
+      $.post('/subscribe', { mail: address}, function(res) {
+        if (res.err) {
+          $(".alert").alert('subscribe failed');
+        } else {
+          $('#mail').val('');
+          $(".alert").alert('subscribe successful');
+        }
+
+      });
+    }
+    else {
+      $(".alert").alert('invalid address');
+    }
+  });
   $.post('/', {tweet: 1}, function(tweets) {
     for (var i = 0; i <tweets.length; i++) {
       insertTweet(tweets[i]);

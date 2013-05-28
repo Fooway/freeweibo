@@ -30,6 +30,7 @@ module.exports = function(url) {
     tid: {type: Number, index: true},
     status: {type: Number, default: 0}, /* 0 - normal; 1 - filtered by weibo; 2 - other */
     create_at: Number,
+    sended: {type: Boolean, default: false},
     text: String,
     user_id: Number,
     user_img: String,
@@ -38,6 +39,10 @@ module.exports = function(url) {
     pic_name: String,
     comments_count: Number,
     reposts_count: Number,
+  });
+
+  model.Mail= mongoose.model('Mail', {
+    address: {type: String, index: true},
   });
 
   return model;

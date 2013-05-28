@@ -53,5 +53,14 @@ module.exports = {
 
   // POST: subscribe email to tweets [/subscribe] TODO:
   subscribe: function(req, res) {
+    model.Mail.update({address: req.param('email')}, {address: email}, { upsert: true }, function(err, res) {
+      res.json({error: !!err});
+    });
+  },
+
+  unsubscribe: function (req, res) {
+    model.Mail.remove({address: email}, function(err, res) {
+      res.render('unsubscribe', {mail: res});
+    });
   }
 };
