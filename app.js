@@ -28,7 +28,7 @@ var app = express();
 app.set('port', 3001);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(express.favicon());
+app.use(express.favicon(__dirname + '/public/images/favicon.ico'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
@@ -46,6 +46,9 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+app.get('/about', function(req, res) {
+  res.render('about');
+});
 app.get('/', controller.index);
 app.post('/', controller.initData);
 app.post('/subscribe', controller.subscribe);

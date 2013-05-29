@@ -14,18 +14,25 @@ $(function () {
     var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
     var address = $('#mail').val().replace(/^\s+|\s+$/g,'');
     if (pattern.test(address)) {
-      $.post('/subscribe', { mail: address}, function(res) {
+      $.post('/subscribe', { email: address}, function(res) {
         if (res.err) {
-          $(".alert").alert('subscribe failed');
+          $("#alert").text('订阅失败！').css('color', 'red').show();
         } else {
-          $('#mail').val('');
-          $(".alert").alert('subscribe successful');
+          $("#alert").text('订阅成功！').css('color', 'green').show();
         }
-
+        $('#mail').val('');
+        setTimeout(function() {
+          $('#alert').fadeOut(2000);
+        }, 1000);
+        
       });
     }
     else {
-      $(".alert").alert('invalid address');
+      $("#alert").text('无效的地址!').css('color', 'red').show();
+      $('#mail').val('');
+      setTimeout(function() {
+        $('#alert').fadeOut(2000);
+      }, 1000);
     }
   });
   $.post('/', {tweet: 1}, function(tweets) {
@@ -59,9 +66,6 @@ $(function () {
     var $main_text = $tweet.find('.text > span');
 
     $main_text.html($main_text.html().replace(/(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>'));
-    if (tweet.status) {
-      $tweet.addClass('filtered');
-    }
   }
 
   function insertUser(user) {

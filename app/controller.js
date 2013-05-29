@@ -5,10 +5,6 @@ var debug = require('debug')('controller');
 var User = model.User;
 var Tweet = model.Tweet;
 
-//var tweet_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'), {encoding: 'utf-8'});
-//var user_tmpl = fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'), {encoding: 'utf-8'});
-
-
 module.exports = {
 
   db: model,
@@ -51,9 +47,10 @@ module.exports = {
     }
   },
 
-  // POST: subscribe email to tweets [/subscribe] TODO:
+  // POST: subscribe email to tweets [/subscribe]:
   subscribe: function(req, res) {
-    model.Mail.update({address: req.param('email')}, {address: email}, { upsert: true }, function(err, res) {
+    var email = req.param('email');
+    model.Mail.update({address: email}, {address: email}, { upsert: true }, function(err,mail) {
       res.json({error: !!err});
     });
   },

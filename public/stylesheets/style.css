@@ -3,8 +3,13 @@
   padding: 0;
 }
 body {
-  padding: 50px;
+  padding: 50px 0;
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+body .container {
+  min-width: 200px;
+  max-width: 940px;
+  width: 90%;
 }
 body .media .pull-left {
   margin-top: 5px;
@@ -27,11 +32,26 @@ body .header a {
   font-weight: bold;
   line-height: 37px;
   text-decoration: none;
+  margin-right: 10px;
+  color: #666;
+  display: inline-block;
+}
+body .header a:hover {
+  color: #edd;
+}
+body .header .logo img {
+  height: 70px;
 }
 body .header .clear {
   clear: both;
 }
 body .header .input-append {
+  margin-top: 25px;
+  float: right;
+}
+body .header #alert {
+  margin-top: 30px;
+  margin-right: 10px;
   float: right;
 }
 body .tweets {
@@ -43,9 +63,6 @@ body .tweets li {
 }
 body .tweets li .media-body img {
   margin-top: 5px;
-}
-body .tweets .filtered {
-  background-color: #edd;
 }
 body .tweets .thumb_img:hover {
   cursor: pointer;
@@ -62,4 +79,13 @@ body .tweets .middle_img:hover {
 }
 body .row-fluid .span3 {
   float: right;
+}
+/* tablet and mobile phones */
+@media only screen and (max-width: 716px) {
+  .row-fluid .span8 {
+    width: 100%;
+  }
+  .row-fluid .span3 {
+    display: none;
+  }
 }

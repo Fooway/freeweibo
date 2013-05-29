@@ -3,9 +3,13 @@
   padding: 0
 
 body
-  padding: 50px
+  padding: 50px 0
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif
 
+  .container
+    min-width: 200px
+    max-width: 940px
+    width: 90%
   .media
     .pull-left
       margin-top: 5px
@@ -25,10 +29,23 @@ body
       font-weight: bold
       line-height: 37px
       text-decoration: none
+      margin-right: 10px
+      color: #666
+      display: inline-block
+      &:hover
+        color: #edd
+    .logo
+      img
+        height: 70px
     .clear
       clear: both
       
     .input-append 
+      margin-top: 25px
+      float: right
+    #alert
+      margin-top: 30px
+      margin-right: 10px
       float: right
 
   .tweets
@@ -41,8 +58,6 @@ body
           margin-top: 5px
         
 
-    .filtered
-      background-color: #edd
     .thumb_img:hover
         cursor: pointer
         cursor: -webkit-zoom-in
@@ -56,4 +71,12 @@ body
 
   .row-fluid .span3
     float: right
+
+/* tablet and mobile phones */
+@media only screen and (max-width: 716px) 
+  .row-fluid 
+    .span8
+      width: 100%
+    .span3
+      display: none
 

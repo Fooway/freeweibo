@@ -4,8 +4,8 @@ var debug = require('debug')('mail');
 var transport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
     auth: {
-        user: "gmail.user@gmail.com",
-        pass: "userpass"
+        user: "freeweibo.me@gmail.com",
+        pass: "Everdance1983"
     }
 });
 

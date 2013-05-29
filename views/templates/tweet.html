@@ -2,7 +2,8 @@ li
   .media
     img.pull-left(src=tweet.user_img)
     .media-body
-      h5.media-heading= tweet.user_name
+      h5.media-heading 
+        a(href='//weibo.com/u/' + tweet.user_id)= tweet.user_name
       p.text 
         span #{tweet.text}
         - if (tweet.pic_name != '') {
