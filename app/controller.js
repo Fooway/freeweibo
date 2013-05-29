@@ -55,7 +55,7 @@ module.exports = {
 
   unsubscribe: function (req, res) {
     var email = req.param('mail');
-    model.Mail.remove({address: email}, function(err, mail) {
+    model.Mail.remove({address: email}, function(err) {
       res.render('unsubscribe', {mail: mail});
     });
   }
