@@ -26,7 +26,7 @@ module.exports = {
   initData: function(req, res) {
     // get tweets
     if (req.param('tweet')) {
-      Tweet.find({})
+      Tweet.find({status: 1})
         .limit(70)
         .sort('-create_at')
         .exec(function(err, tweets) {
