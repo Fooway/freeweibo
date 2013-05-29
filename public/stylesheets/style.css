@@ -89,3 +89,9 @@ body .row-fluid .span3 {
     display: none;
   }
 }
+@media only screen and (max-width: 350px) {
+  body .container .header #alert {
+    margin-top: 0;
+    margin-right: 70px;
+  }
+}

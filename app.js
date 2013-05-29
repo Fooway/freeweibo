@@ -9,6 +9,7 @@ var path = require('path');
 var fetcher = require('./fetcher');
 var config = require('./app/config');
 var controller = require('./app/controller');
+var mail = require('./app/mail');
 
 process.on('uncaughtException', function (e) {
   console.log('EXCEPTION: ' + e);
@@ -21,6 +22,8 @@ process.on('exit', function () {
 
 // first, boot fetcher
 fetcher(controller.db, config);
+// then, mailer
+mail(controller.db);
 
 var app = express();
 
@@ -49,6 +52,7 @@ if ('development' == app.get('env')) {
 app.get('/about', function(req, res) {
   res.render('about');
 });
+app.get('/cancel', controller.unsubscribe);
 app.get('/', controller.index);
 app.post('/', controller.initData);
 app.post('/subscribe', controller.subscribe);

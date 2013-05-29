@@ -12,7 +12,7 @@ module.exports = {
   // GET: [/]
   index: function(req, res) {
     res.render('index', { 
-      title: "freeWeibo"
+      title: "FreeWeibo"
     });
   },
 
@@ -54,8 +54,9 @@ module.exports = {
   },
 
   unsubscribe: function (req, res) {
-    model.Mail.remove({address: email}, function(err, res) {
-      res.render('unsubscribe', {mail: res});
+    var email = req.param('mail');
+    model.Mail.remove({address: email}, function(err, mail) {
+      res.render('unsubscribe', {mail: mail});
     });
   }
 };
