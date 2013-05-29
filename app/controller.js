@@ -12,9 +12,7 @@ module.exports = {
   // GET: [/]
   index: function(req, res) {
     res.render('index', { 
-      title: "FilterBack"//,
-    //tweet_tmpl: tweet_tmpl,
-    //user_tmpl: user_tmpl
+      title: "freeWeibo"
     });
   },
 
