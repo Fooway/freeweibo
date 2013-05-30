@@ -29,7 +29,7 @@ module.exports = function(model, config) {
     setTimeout(sendMails, 24*60*60*1000);
     model.Tweet.find({status: 1, sended: false })
       .limit(10)
-      .sort('-create_at')
+      .sort('-delete_time')
       .exec(function(err, tweets) {
         if (err || tweets.length == 0) {
           debug(err?err:'no tweets to send');
