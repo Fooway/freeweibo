@@ -2,6 +2,7 @@ var nodemailer = require('nodemailer');
 var jade = require('jade');
 var fs = require('fs');
 var path = require('path');
+var crypto = require('crypto');
 var debug = require('debug')('mail');
 
 var transport = nodemailer.createTransport("SMTP", {
@@ -12,8 +13,10 @@ var transport = nodemailer.createTransport("SMTP", {
     }
 });
 
-module.exports = function(model) {
+module.exports = function(model, config) {
   var model = model;
+  var salt = config.salt?config.salt:'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq';
+  var md5 = crypto.createHash('md5');
   var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'), {encoding: 'utf-8'});
   var fn = jade.compile(fileStr);
   
@@ -24,12 +27,17 @@ module.exports = function(model) {
 
     debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
     setTimeout(sendMails, 24*60*60*1000);
-    model.Tweet.find({status: 0, sended: false })
+    model.Tweet.find({status: 1, sended: false })
       .limit(10)
       .sort('-create_at')
       .exec(function(err, tweets) {
         if (err || tweets.length == 0) {
           debug(err?err:'no tweets to send');
+          return;
+        }
+
+        if (tweets.length <= 5) {
+          debug(err?err:'tweets too less to send');
           return;
         }
 
@@ -47,7 +55,6 @@ module.exports = function(model) {
           content += '</ul>';
           content += '<p><a href="http://freeweibo.me">查看更多</a></p>';
           content += '<p>取消订阅请点击:<a href="http://freeweibo.me/cancel?mail=';
-
           for (var i = 0; i < mails.length; i++) {
             sendOne(mails[i].address);
           };
@@ -56,7 +63,9 @@ module.exports = function(model) {
           model.Tweet.update({status:1, sended: false}, {sended: true});
           function sendOne(address) {
             var html = content;
+            md5.update(salt + address);
             html += encodeURI(address);
+            html += '&hash=' + md5.digest('base64');
             html += '">此处</a></p></div>';
             transport.sendMail({
               from: 'freeweibo.me@gmail.com',

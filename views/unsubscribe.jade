@@ -2,8 +2,16 @@ doctype 5
 html
   head
     title Unsubscribe | freeWeibo
+    style
+      body {margin: 50px auto; max-width: 400px; width: 90%; text-align: center;}
+      p{font-size: 20px;}
   body
-    p 
-      em #{mail}
-      span has successfully unsubscribed from 
-      a(href='/') freeweibo
+    p
+      - if (err) {
+        span 对不起，#{err} !
+      - } else {
+        em #{mail}
+        span 从 
+        a(href='http://freeweibo.me') freeweibo
+        span 取消订阅成功
+      - }

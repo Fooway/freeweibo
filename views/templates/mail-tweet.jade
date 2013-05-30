@@ -11,6 +11,9 @@ li(style='border-bottom:1px solid #eee; margin-bottom:20px;')
           img(src='http://freeweibo.me/images/tweets/' + tweet.pic_name + '_thumb.jpg')
         - }
       p.tail 
+        - if (tweet.pic_name != '') {
+          a(href='http://freeweibo.me/images/tweets/' + tweet.pic_name + '_large.jpg') 查看大图
+        - }
         span(style='margin-right:50px;') #{date} 
         转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
 

@@ -5,7 +5,9 @@ var config = module.exports = {
     delete_interval_days: 5,
     api_request_interval_secs: 5,
     check_select_tweets_days: 4,
-    follower_threshold: 400000
+    follower_threshold: 400000,
+    salt: 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq',
+    page_num: 30
   },
 
   tweeters: [

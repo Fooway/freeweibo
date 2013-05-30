@@ -1,14 +1,29 @@
 $(function () {
 
-  var jade = require('jade');
-  var tweetTmp = jade.compile($('#tweet-template').html());
-  var userTmp = jade.compile($('#user-template').html());
+  // spinner
+  var opts = {
+    lines: 10, // The number of lines to draw
+    length: 10, // The length of each line
+    width: 5, // The line thickness
+    radius: 15, // The radius of the inner circle
+    corners: 1, // Corner roundness (0..1)
+    rotate: 0, // The rotation offset
+    direction: 1, // 1: clockwise, -1: counterclockwise
+    color: '#000', // #rgb or #rrggbb
+    speed: 1, // Rounds per second
+    trail: 60, // Afterglow percentage
+    shadow: false, // Whether to render a shadow
+    hwaccel: false, // Whether to use hardware acceleration
+    className: 'spinner', // The CSS class to assign to the spinner
+    zIndex: 2e9, // The z-index (defaults to 2000000000)
+    top: '100', // Top position relative to parent in px
+    left: 'auto' // Left position relative to parent in px
+  };
 
-  $(document).ajaxStart(function() {
-    $('.tweets').css('cursor', 'wait');
-    $('.users').css('cursor', 'wait');
-  });
+  var target = document.getElementById('load-spin');
+  var spinner;
 
+  // subscribe function
   $('#subscribe').on('click', function () {
     // body...
     var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
@@ -35,19 +50,45 @@ $(function () {
       }, 1000);
     }
   });
-  $.post('/', {tweet: 1}, function(tweets) {
-    for (var i = 0; i <tweets.length; i++) {
-      insertTweet(tweets[i]);
-    };
-    $('.tweets').css('cursor', 'default');
-  }, 'json');
 
-  $.post('/', {user: 1}, function(users) {
-    for (var i = 0; i < users.length; i++) {
-      insertUser(users[i]);
+  var page_num = 0;
+  var current_page = 0;
+  function getTweets() {
+    if (page_num > current_page) {
+      spinner.stop();
+      return;
+    }
+    page_num++;
+    $.post('/', {page: page_num}, function(data) {
+      spinner.stop();
+      if (data.err) {
+        $('.tweets').append(data.err);
+        return;
+      }
+      if (data.tweets == '') {
+        $('.tweets').append('<p>所有记录已加载</p>');
+        return;
+      }
+      $('.tweets').append(data.tweets);
+      current_page++;
+    });
+  }
+
+  $(window).scroll((function() {
+    var timerID = null;
+    var timer = 200;
+
+    return function() {
+      clearTimeout(timerID);
+      timerID = setTimeout(function() {
+        if($(window).scrollTop() >= $('.tweets').offset().top + $('.tweets').height() - $(window).height()) {
+          opts.top = $('.tweets').height() + 70;
+          spinner = new Spinner(opts).spin(target);
+          getTweets();
+        }
+      }, timer);
     };
-    $('.users').css('cursor', 'default');
-  }, 'json');
+  })());
 
   $('.tweets').on('click', '.thumb_img', function() {
     $(this).hide();
@@ -59,16 +100,4 @@ $(function () {
     $(this).prev().show();
   });
 
-  function insertTweet(tweet) {
-    tweet.create_at = (new Date(tweet.create_at)).toLocaleString();
-
-    var $tweet = $(tweetTmp({tweet: tweet})).appendTo('.tweets');
-    var $main_text = $tweet.find('.text > span');
-
-    $main_text.html($main_text.html().replace(/(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>'));
-  }
-
-  function insertUser(user) {
-    $('.users').append(userTmp({user: user}));
-  }
 })

@@ -23,7 +23,7 @@ process.on('exit', function () {
 // first, boot fetcher
 fetcher(controller.db, config);
 // then, mailer
-mail(controller.db);
+mail(controller.db, config);
 
 var app = express();
 
@@ -54,7 +54,7 @@ app.get('/about', function(req, res) {
 });
 app.get('/cancel', controller.unsubscribe);
 app.get('/', controller.index);
-app.post('/', controller.initData);
+app.post('/', controller.getPage);
 app.post('/subscribe', controller.subscribe);
 
 http.createServer(app).listen(app.get('port'), function(){

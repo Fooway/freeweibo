@@ -46,6 +46,7 @@ function check() {
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
     .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
+    .sort('-create_at')
     .select('tid')
     .exec(function(err, tweets) {
       function done(results) {

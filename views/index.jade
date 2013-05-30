@@ -5,17 +5,11 @@ block content
     include header
     .row-fluid 
       .span8
+        #load-spin
         ul.tweets
+          each tweet in tweets
+            include templates/tweet
       .span3
-        //
-          .input-append
-            input.input-medium(type='text', id='tweeter_name', placeholder='微博昵称')
-            button.btn(id='add_tweeter') 加入
         ul.users
-
-
-  script#tweet-template(type='template')
-    include templates/tweet.html
-  script#user-template(type='template')
-    include templates/user.html
-
+          each user in users
+            include templates/user
