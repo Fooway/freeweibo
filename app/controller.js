@@ -19,7 +19,7 @@ function getTweets(page, cb) {
   Tweet.find({status: 1})
     .limit(page_num)
     .skip(page_num*page)
-    .sort('-create_at')
+    .sort('-delete_time')
     .exec(function(err, tweets) {
       if (err) {
         debug(err.message);

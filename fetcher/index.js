@@ -60,7 +60,7 @@ function check() {
            (response.error_code == 20132) || //抱歉，该内容暂时无法查看。如需帮助，请联系客服
            (response.error_code == 20135))) { //源微博已被删除
           model.Tweet.update({tid: tweet.tid},
-              {status: 1}, function() {});
+              {status: 1, delete_time: (new Date()).valueOf()}, function() {});
           debug('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user.id}, function(){});
         }

@@ -2,7 +2,7 @@ $(function () {
 
   // spinner
   var opts = {
-    lines: 10, // The number of lines to draw
+    lines: 13, // The number of lines to draw
     length: 10, // The length of each line
     width: 5, // The line thickness
     radius: 15, // The radius of the inner circle
@@ -62,15 +62,18 @@ $(function () {
     $.post('/', {page: page_num}, function(data) {
       spinner.stop();
       if (data.err) {
-        $('.tweets').append(data.err);
+        $('.tweets').append('<p style="text-align:center;">' + data.err + '</p>');
         return;
       }
       if (data.tweets == '') {
-        $('.tweets').append('<p>所有记录已加载</p>');
+        $('.tweets').append('<p style="text-align:center;">所有记录已加载</p>');
         return;
       }
       $('.tweets').append(data.tweets);
       current_page++;
+    }).fail(function() {
+      spinner.stop();
+      $('.tweets').append('<p style="text-align:center;">加载失败</p>');
     });
   }
 
