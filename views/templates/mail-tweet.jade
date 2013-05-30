@@ -1,16 +1,16 @@
-li(style='border-bottom:1px solid #eee; margin-bottom:20px;')
+li(style='border-bottom:1px solid #ccc; margin-bottom:20px;')
   .media(style='overflow:hidden;')
     img(src=tweet.user_img, style='float:left;')
     .media-body(style='overflow:hidden; padding-left:10px;')
       h5(style='margin-top: 0; margin-bottom: 10px; font-size: 16px')
         a(href='//weibo.com/u/' + tweet.user_id, style='text-decoration:none')= tweet.user_name
       p
-        span(style='color:#666;') #{tweet.text}
+        span(style='color:#666;font-size:22px;') #{tweet.text}
         - if (tweet.pic_name != '') {
           br
           img(src='http://freeweibo.me/images/tweets/' + tweet.pic_name + '_thumb.jpg')
         - }
-      p.tail 
+      p.tail(style='font-size:12px;')
         - if (tweet.pic_name != '') {
           a(href='http://freeweibo.me/images/tweets/' + tweet.pic_name + '_large.jpg') 查看大图
         - }

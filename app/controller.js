@@ -32,7 +32,8 @@ function getTweets(page, cb) {
 
 function  convert(tweets) {
   for (var i = 0; i < tweets.length; i++) {
-    tweets[i].date = (new Date(tweets[i].create_at)).toLocaleString();
+    tweets[i].date =(new Date(tweets[i].create_at)).toLocaleTimeString("en-US") + '  ' +
+                    (new Date(tweets[i].create_at)).toLocaleDateString("en-US");
     tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>');
   };
 }

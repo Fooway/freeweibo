@@ -49,7 +49,8 @@ module.exports = function(model, config) {
 
           var content = '<div><h2 style="text-align:center;">最近被删除屏蔽的微博摘要</h2><ul>';
           for (var i = 0; i <tweets.length; i++) {
-            date = (new Date(tweets[i].create_at)).toLocaleString();
+            date =(new Date(tweets[i].create_at)).toLocaleTimeString("en-US") + '  ' +
+                  (new Date(tweets[i].create_at)).toLocaleDateString("en-US");
             content += fn({tweet:tweets[i], date: date});
           };
           content += '</ul>';
