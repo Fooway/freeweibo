@@ -33,7 +33,7 @@ module.exports = function(model, config) {
       if (err) {
         console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       } else {
-        console.log('message sended for ' + address);
+        console.log('message sended for ' + option.address);
       }
       cb?cb():null;
     });
@@ -79,7 +79,7 @@ module.exports = function(model, config) {
           };
 
           // update send mark
-          model.Tweet.update({status:1, sended: false}, {sended: true});
+          model.Tweet.update({status:1, sended: false}, {sended: true}, { multi: true }, function(){});
           function sendOne(address) {
             var html = content;
             md5.update(salt + address);

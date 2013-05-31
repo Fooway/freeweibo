@@ -227,7 +227,6 @@ function generateUrl(method, option) {
 
 function getInterfaceAddress() {
   var interfaces = os.networkInterfaces();
-  var addresses = [];
   for (name in interfaces) {
     if (name.match(/^(en|eth)\d/)) {
       for (k in interfaces[name]) {
