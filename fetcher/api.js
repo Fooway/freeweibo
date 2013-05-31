@@ -4,7 +4,7 @@
  * */
 
 var fs = require('fs');
-var https = require('https');
+var http = require('http');
 var request = require('request');
 var querystring = require('querystring');
 var extend = require('extend');
@@ -44,9 +44,10 @@ var account = {
 };
 // api interfaces
 var api = {
-  baseUrl: "https://api.weibo.com/2/",
+  host: '180.149.135.230',// "https://api.weibo.com/2/",
+  localAddress: '2600:3c00::f03c:91ff:fe70:59c9',
   user_tweets: {
-    url: "statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
+    url: "/2/statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
     param: {
       screen_name: account.screen_name,
       count: 10,                  // returned  number of tweets
@@ -56,12 +57,12 @@ var api = {
   },
 
   get_tweet:  {    // get a tweet by id
-    url: "statuses/show.json", 
+    url: "/2/statuses/show.json", 
     param: {}
   },
 
   get_user:  {    // get user by id
-    url: "users/show.json" ,
+    url: "/2/users/show.json" ,
     param: {}
   }    
 
@@ -161,7 +162,7 @@ module.exports = function() {
         async.map(files, function(item, cb) {
           request(item.remote, function (error, response, body) {
             if(error){
-              console.error('error: '+ error);
+              console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
             }
           }).pipe(fs.createWriteStream(item.local));
           cb();
@@ -181,7 +182,7 @@ module.exports = function() {
 // request api function
 function get(url, callback) {
   debug('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
-  https.get(url, function(res) {
+  http.get(url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
     res.on('end', function() {
@@ -194,7 +195,7 @@ function get(url, callback) {
       buffer = [];
     })
   }).on('error', function(e) {
-    console.error('error: ' + e);
+    console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + e);
     callback(e, null);
   });
 }

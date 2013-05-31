@@ -19,14 +19,31 @@ module.exports = function(model, config) {
   var md5 = crypto.createHash('md5');
   var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'), {encoding: 'utf-8'});
   var fn = jade.compile(fileStr);
-  
-  sendMails();
 
+  sendSubscribeMails();
+  setTimeout(sendErrorLog, 4*60*60*1000);
 
-  function sendMails() {
+  return function mail(option, cb) {
+    transport.sendMail({
+      from: 'freeweibo.me@gmail.com',
+      to: option.address,
+      subject: option.sub,
+      text: option.text || '',
+      html: option.html || ''
+    }, function(err, response){
+      if (err) {
+        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+      } else {
+        debug('message sended for ' + address);
+      }
+      cb?cb():null;
+    });
+  };
+
+  function sendSubscribeMails() {//{{{
 
     debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
-    setTimeout(sendMails, 24*60*60*1000);
+    setTimeout(sendSubscribeMails, 24*60*60*1000);
     model.Tweet.find({status: 1, sended: false })
       .limit(10)
       .sort('-delete_time')
@@ -50,8 +67,8 @@ module.exports = function(model, config) {
           var content = '<div><h2 style="text-align:center;">最近被删除屏蔽的微博摘要</h2><ul>';
           for (var i = 0; i <tweets.length; i++) {
             date =(new Date(tweets[i].create_at)).toLocaleTimeString("en-US") + '  ' +
-                  (new Date(tweets[i].create_at)).toLocaleDateString("en-US");
-            content += fn({tweet:tweets[i], date: date});
+          (new Date(tweets[i].create_at)).toLocaleDateString("en-US");
+        content += fn({tweet:tweets[i], date: date});
           };
           content += '</ul>';
           content += '<p><a href="http://freeweibo.me">查看更多</a></p>';
@@ -68,18 +85,36 @@ module.exports = function(model, config) {
             html += encodeURI(address);
             html += '&hash=' + md5.digest('base64');
             html += '">此处</a></p></div>';
-            transport.sendMail({
-              from: 'freeweibo.me@gmail.com',
-              to: address,
-              subject: 'FreeWeibo最新更新 ' + (new Date()).toDateString(),
+            mail({
+              address: address,
+              sub: 'FreeWeibo最新更新 ' + (new Date()).toDateString(),
               text: '',
               html: html
-            }, function(err, response){
-              debug(err?err: 'message sended for ' + address);
             });
           }
 
         });
       });
+  }//}}}//}}}
+  function sendErrorLog() {
+    setTimeout(sendErrorLog, 24*60*60*1000);
+    var date = new Date();
+    var path = path.normalize(__dirname + '/../logs/');
+    fs.readFile(path + 'error.log'), {encoding: 'utf-8'}, function(err, data) {
+      if (err) {
+        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+        return;
+      }
+      mail({address: 'tristones.liu@gmail.com', 
+            subject: 'ErrorLog >> ' + date.toLocaleString('en-US'),
+            text: data
+      }, function() {
+        // backup log
+        fs.rename(path + 'error.log', 
+          path + 'error-' + date.getFullYear() + '-' +
+          date.getMonth + '-' + date.getDate() + 
+          date.getHours + '-' + date.getMinutes() + '.log');
+      });
+    });
   }
 }

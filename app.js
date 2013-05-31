@@ -12,8 +12,12 @@ var controller = require('./app/controller');
 var mail = require('./app/mail');
 
 process.on('uncaughtException', function (e) {
-  console.log('EXCEPTION: ' + e);
-  process.exit();
+  console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + 'EXCEPTION: ' + e);
+  sendmail({
+    address: 'tristones.liu@gmail.com', 
+    sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
+    text: '>>> ' + e
+    }, process.exit);
 });
 
 process.on('exit', function () {
@@ -23,7 +27,7 @@ process.on('exit', function () {
 // first, boot fetcher
 fetcher(controller.db, config);
 // then, mailer
-mail(controller.db, config);
+var sendmail = mail(controller.db, config);
 
 var app = express();
 

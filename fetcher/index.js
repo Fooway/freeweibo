@@ -59,8 +59,12 @@ function check() {
            (response.error_code == 20112) || //由于作者隐私设置，你没有权限查看此微博
            (response.error_code == 20132) || //抱歉，该内容暂时无法查看。如需帮助，请联系客服
            (response.error_code == 20135))) { //源微博已被删除
+          // update tweet status
           model.Tweet.update({tid: tweet.tid},
               {status: 1, delete_time: (new Date()).valueOf()}, function() {});
+          // increment users delete_attribute
+          model.User.update({uid: tweet.attributed_uid},
+            {$inc:{delete_attributed:1}}, {upsert: false},function(){});
           debug('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user.id}, function(){});
         }
@@ -130,7 +134,7 @@ function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets || !tweets.length) { 
       if (err) {
-      console.error(err);
+      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       } else {
         debug('no new tweet for ' + user.name);
       }
@@ -141,7 +145,7 @@ function fetchTweets(user, callback) {
     debug('fetched ' + tweets.length + ' tweets for ' + user.name);
     model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(err) {
       if (err) { 
-        console.error(err);
+        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       }
     });
 
@@ -162,6 +166,8 @@ function saveTweet(tweet, cb) {
     cb();
     return;
   }
+
+  var attributed = tweet.user.id;
   // only save original tweet
   if (tweet.retweeted_status) {
     tweet = tweet.retweeted_status;
@@ -190,6 +196,8 @@ function saveTweet(tweet, cb) {
           tid: tweet.id,
           status: 0,
           create_at: time.valueOf(),
+          delete_time: 0,
+          sended: false,
           text: tweet.text,
           origin_pic_url: tweet.original_pic || '', 
           user_id: uid,
@@ -197,10 +205,11 @@ function saveTweet(tweet, cb) {
           user_img: img,
           pic_name: image_name,
           comments_count: tweet.comments_count,
-          reposts_count: tweet.reposts_count
+          reposts_count: tweet.reposts_count,
+          attributed_uid: attributed
         }, function(err, newtweet) {
           if (err) {
-            console.error(err);
+            console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
           } else {
             debug('tweet [' + newtweet.tid + '] save done!');
           }
@@ -230,7 +239,7 @@ function deleteOld() {
   .select('tid image_name')
   .exec(function(err, tweets) {
     if (err) {
-      console.error(err);
+      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       setTimeout(deleteOld, 1*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
@@ -264,7 +273,7 @@ function fetchUser(option, cb) {
       api.getUserInfo(option, function(err, user) {
         if (err || user.error) {
           var error = err || user.error;
-          console.error(error);
+          console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
         } else {
           if (user.followers_count > FOLLOWER_THRESHOLD) {
             debug('add ' + user.screen_name + ', has ' +

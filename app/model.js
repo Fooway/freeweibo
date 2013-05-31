@@ -23,7 +23,8 @@ module.exports = function(url) {
     gender: String,
     followers_cnt: Number,
     friends_cnt: Number,
-    tweets_cnt: Number
+    tweets_cnt: Number,
+    delete_attributed: Number
   });
 
   model.Tweet = mongoose.model('Tweet', {
@@ -40,6 +41,7 @@ module.exports = function(url) {
     pic_name: String,
     comments_count: Number,
     reposts_count: Number,
+    attributed_uid: Number
   });
 
   model.Mail= mongoose.model('Mail', {
