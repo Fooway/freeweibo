@@ -44,7 +44,7 @@ var account = {
 };
 // api interfaces
 var api = {
-  host: '180.149.135.230',// "https://api.weibo.com/2/",
+  host: '180.149.135.230', // "https://api.weibo.com/2/",
   localAddress: '2600:3c00::f03c:91ff:fe70:59c9',
   user_tweets: {
     url: "/2/statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
@@ -211,7 +211,10 @@ function generateUrl(method, option) {
     delete param.screen_name;
   }
   // override
-  return api.baseUrl + api[method].url +
-    '?' + querystring.stringify(param);
+  return {
+    host: api.host,
+    localAddress: api.localAddress,
+    path: api[method].url + '?' + querystring.stringify(param)
+  };
 }
 

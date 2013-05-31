@@ -23,7 +23,7 @@ module.exports = function(model, config) {
   sendSubscribeMails();
   setTimeout(sendErrorLog, 4*60*60*1000);
 
-  return function mail(option, cb) {
+  var mail = function(option, cb) {
     transport.sendMail({
       from: 'freeweibo.me@gmail.com',
       to: option.address,
@@ -40,7 +40,9 @@ module.exports = function(model, config) {
     });
   };
 
-  function sendSubscribeMails() {//{{{
+  return mail;
+
+  function sendSubscribeMails() {
 
     debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
     setTimeout(sendSubscribeMails, 24*60*60*1000);
@@ -95,12 +97,13 @@ module.exports = function(model, config) {
 
         });
       });
-  }//}}}//}}}
+  }
+
   function sendErrorLog() {
     setTimeout(sendErrorLog, 24*60*60*1000);
     var date = new Date();
     var path = path.normalize(__dirname + '/../logs/');
-    fs.readFile(path + 'error.log'), {encoding: 'utf-8'}, function(err, data) {
+    fs.readFile(path + 'error.log', {encoding: 'utf-8'}, function(err, data) {
       if (err) {
         console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
         return;

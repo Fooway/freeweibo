@@ -31,7 +31,7 @@ module.exports = function(url) {
     tid: {type: Number, index: true},
     status: {type: Number, default: 0}, /* 0 - normal; 1 - filtered by weibo; 2 - other */
     create_at: Number,
-    delete_time: {type: Number, default: 0}
+    delete_time: {type: Number, default: 0},
     sended: {type: Boolean, default: false},
     text: String,
     user_id: Number,
