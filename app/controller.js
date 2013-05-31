@@ -31,8 +31,9 @@ function getTweets(page, cb) {
 
 function  convert(tweets) {
   for (var i = 0; i < tweets.length; i++) {
-    tweets[i].date =(new Date(tweets[i].create_at)).toLocaleTimeString("en-US") + '  ' +
-                    (new Date(tweets[i].create_at)).toLocaleDateString("en-US");
+    var date = new Date(tweets[i].create_at);
+    tweets[i].date = date.toLocaleTimeString("en-US") + ' ' + date.getDate() +
+                     '/' + (date.getMonth()+1) + '/' + date.getFullYear();
     tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>');
   };
 }
