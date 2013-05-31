@@ -3,7 +3,6 @@ var jade = require('jade');
 var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
-var debug = require('debug')('mail');
 
 var transport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
@@ -34,7 +33,7 @@ module.exports = function(model, config) {
       if (err) {
         console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       } else {
-        debug('message sended for ' + address);
+        console.log('message sended for ' + address);
       }
       cb?cb():null;
     });
@@ -44,25 +43,25 @@ module.exports = function(model, config) {
 
   function sendSubscribeMails() {
 
-    debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
+    console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
     setTimeout(sendSubscribeMails, 24*60*60*1000);
     model.Tweet.find({status: 1, sended: false })
       .limit(10)
       .sort('-delete_time')
       .exec(function(err, tweets) {
         if (err || tweets.length == 0) {
-          debug(err?err:'no tweets to send');
+          console.error(err?err:'no tweets to send');
           return;
         }
 
         if (tweets.length <= 5) {
-          debug(err?err:'tweets too less to send');
+          console.error(err?err:'tweets too less to send');
           return;
         }
 
         model.Mail.find(function (err, mails) {
           if (err || mails.length == 0) {
-            debug(err?err:'no subscribers to send');
+            console.error(err?err:'no subscribers to send');
             return;
           }
 

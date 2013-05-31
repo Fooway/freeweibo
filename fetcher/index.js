@@ -5,7 +5,6 @@
 var fs = require('fs');
 var api = require('./api')();
 var async = require('async');
-var debug = require('debug')('fetcher');
 
 // mongodb model
 var model = {};
@@ -42,7 +41,7 @@ var fetcher = module.exports = function (db, config) {
 
 // check all the tweets' status in db.
 function check() {
-  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
+  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
     .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
@@ -65,7 +64,7 @@ function check() {
           // increment users delete_attribute
           model.User.update({uid: tweet.attributed_uid},
             {$inc:{delete_attributed:1}}, {upsert: false},function(){});
-          debug('tweet ' + tweet.tid + ' unavailabe');
+          console.log('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user.id}, function(){});
         }
         if (response.id) {
@@ -83,7 +82,7 @@ function check() {
         // so we will not exceed the api access frequency
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
-          debug('[ '+ (new Date()).toLocaleTimeString() + ' ] checking tweet [' + tweet.tid + ']...');
+          console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] checking tweet [ ' + tweet.tid + ']... ');
           api.getTweetById(tweet.tid, function(err, data) {
             update_status(err, data, tweet); cb();
           });
@@ -94,20 +93,19 @@ function check() {
 
 // fetch tweets for users
 function fetch() {
-  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start fetch...');
+  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start fetch...');
   model.User.find(function(err, users) {
     if (err) {
-      debug(err.message);
+      console.error(err.message);
       return;
     }
     if (users.length == 0) {
-      debug('initialize tweeters...');
+      console.log('initialize tweeters...');
       async.eachSeries(tweeters, function(tweeter, cb) {
         // need to delay 1s for each tweet
         // so we will not exceed the api access frequency
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
-          debug('[ '+ (new Date()).toLocaleTimeString() + ' ] get user [' + tweeter + ']...');
           fetchUser({name: tweeter}, function() { cb();});
         }, API_REQUEST_INTERVAL_BY_SEC * 1000);
       }, function() {
@@ -117,8 +115,8 @@ function fetch() {
     }
     async.eachSeries(users, function(user, cb) {
       setTimeout(function() { 
+        console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] fetching user [ ' + user.name + ']... ');
         fetchTweets(user, function() {
-          debug('Done at [ '+ (new Date()).toLocaleTimeString() + ' ]');
           cb();});
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
     }, function(results) {
@@ -130,19 +128,16 @@ function fetch() {
 
 // api get wrapper for getting user's latest tweets
 function fetchTweets(user, callback) {
-  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] fetching tweets for ' + user.name + '...');
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets || !tweets.length) { 
       if (err) {
-      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
-      } else {
-        debug('no new tweet for ' + user.name);
-      }
+        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+      } 
       callback();
       return;
     }
 
-    debug('fetched ' + tweets.length + ' tweets for ' + user.name);
+    console.log('fetched ' + tweets.length + ' tweets.');
     model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(err) {
       if (err) { 
         console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
@@ -210,21 +205,18 @@ function saveTweet(tweet, cb) {
         }, function(err, newtweet) {
           if (err) {
             console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
-          } else {
-            debug('tweet [' + newtweet.tid + '] save done!');
           }
           cb();
         });
       });
     } else {
-      debug('tweet [' + tweet.id + '] already exists, skip!');
       cb();
     }
   });
 }
 
 function deleteOld() {
-  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] start deleting old tweets...');
+  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start deleting old tweets...');
   var now = (new Date()).valueOf();
 
   // first, remove all old tweets with no image
@@ -246,10 +238,10 @@ function deleteOld() {
         model.Tweet.remove({tid: tweet.tid});
         var files = api.imagePath(tweet.image_name);
 
-        debug('deleting tweet: ' + tweet.tid);
+        console.log('deleting tweet: ' + tweet.tid);
 
         for (var i = 0; i < files.length; i++) {
-          debug('deleting ' + files[i]);
+          console.log('deleting ' + files[i]);
           fs.unlink(files[i]);
         };
         cb();
@@ -263,7 +255,7 @@ function deleteOld() {
 function fetchUser(option, cb) {
   model.User.find(option, function(err, user) {
     if (err) {
-      debug(err);
+      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
       cb();
       return;
     }
@@ -276,7 +268,7 @@ function fetchUser(option, cb) {
           console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
         } else {
           if (user.followers_count > FOLLOWER_THRESHOLD) {
-            debug('add ' + user.screen_name + ', has ' +
+            console.log('add ' + user.screen_name + ', has ' +
                   user.followers_count + ' followers.');
             var newuser = new model.User({
               name: user.screen_name, 
@@ -290,12 +282,9 @@ function fetchUser(option, cb) {
               friends_cnt: user.friends_count,
               tweets_cnt: user.statuses_count
             });
-            newuser.save(function (err, user) { if(err) debug(err);});
-            } else {
-              debug('ignore ' + user.screen_name + ', has ' +
-                    user.followers_count + ' followers.');
+            newuser.save(function (err, user) { if(err) console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);});
             }
-          }
+        }
         cb();
       });
     }

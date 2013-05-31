@@ -4,14 +4,18 @@
  * */
 
 var fs = require('fs');
-var http = require('http');
+var https = require('https');
+var os = require('os');
 var request = require('request');
 var querystring = require('querystring');
 var extend = require('extend');
 var async = require('async');
 var path = require('path');
 var mkdirp= require('mkdirp');
-var debug = require('debug')('api');
+
+var IPs = { v4:[], v6:[]};
+
+getInterfaceAddress();
 
 var account = { 
   screen_name: "不停跳",
@@ -42,10 +46,11 @@ var account = {
     4057777143
   ]
 };
+
 // api interfaces
 var api = {
-  host: '180.149.135.230', // "https://api.weibo.com/2/",
-  localAddress: '2600:3c00::f03c:91ff:fe70:59c9',
+  host:  'api.weibo.com', 
+  localAddress: IPs.v6[0] || IPs.v4[0],
   user_tweets: {
     url: "/2/statuses/user_timeline.json",   // get a user's tweets by uid or screen_name
     param: {
@@ -160,14 +165,16 @@ module.exports = function() {
         });
 
         async.map(files, function(item, cb) {
-          request(item.remote, function (error, response, body) {
-            if(error){
-              console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
-            }
-          }).pipe(fs.createWriteStream(item.local));
-          cb();
+          request(item.remote,
+                  {localAddress:IPs.v6[0] || IPs.v4[0]}, 
+                  function (error, response, body) {
+                    if(error){
+                      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
+                    }
+                  }).pipe(fs.createWriteStream(item.local));
+                  cb();
         }, function(results) {
-          debug('file ' + base_name + ' save done!');
+          console.log('file ' + base_name + ' save done!');
         });
 
       } else {
@@ -181,15 +188,19 @@ module.exports = function() {
 
 // request api function
 function get(url, callback) {
-  debug('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
-  http.get(url, function(res) {
+  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
+  https.get({
+    host: api.host,
+    localAddress: api.localAddress,
+    path: url
+  }, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
     res.on('end', function() {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      debug(buffer.toString());
+      //console.log(buffer.toString());
 
       callback(null, data);
       buffer = [];
@@ -211,10 +222,25 @@ function generateUrl(method, option) {
     delete param.screen_name;
   }
   // override
-  return {
-    host: api.host,
-    localAddress: api.localAddress,
-    path: api[method].url + '?' + querystring.stringify(param)
-  };
+  return api[method].url + '?' + querystring.stringify(param);
 }
 
+function getInterfaceAddress() {
+  var interfaces = os.networkInterfaces();
+  var addresses = [];
+  for (name in interfaces) {
+    if (name.match(/^(en|eth)\d/)) {
+      for (k in interfaces[name]) {
+        var item = interfaces[name][k];
+        if (item.family == 'IPv4' && !item.internal &&
+            !item.address.match(/^10\./)) {
+          IPs.v4.push(item.address)
+        }
+        if (item.family == 'IPv6' && !item.internal && 
+            !item.address.match(/^fe80/i)) {
+          IPs.v6.push(item.address)
+        }
+      }
+    }
+  }
+}

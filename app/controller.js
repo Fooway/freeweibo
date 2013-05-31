@@ -4,7 +4,6 @@ var model = require('./model')();
 var config = require('./config');
 var crypto = require('crypto');
 var jade = require('jade');
-var debug = require('debug')('controller');
 var User = model.User;
 var Tweet = model.Tweet;
 
@@ -22,7 +21,7 @@ function getTweets(page, cb) {
     .sort('-delete_time')
     .exec(function(err, tweets) {
       if (err) {
-        debug(err.message);
+        console.error(err.message);
         cb(err);
       } else {
         cb(null, tweets);
@@ -49,7 +48,7 @@ module.exports = {
       } else {
         User.find(function(err, users) {
           if (err) {
-            debug(err.message);
+            console.error(err.message);
             res.redirect('404');
           } else {
             convert(tweets);

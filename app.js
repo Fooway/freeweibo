@@ -6,13 +6,11 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var os = require('os');
 var fetcher = require('./fetcher');
 var config = require('./app/config');
 var controller = require('./app/controller');
 var mail = require('./app/mail');
 
-/*
 process.on('uncaughtException', function (e) {
   console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + 'EXCEPTION: ' + e);
   sendmail({
@@ -20,27 +18,8 @@ process.on('uncaughtException', function (e) {
     sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
     text: '>>> ' + e
     }, process.exit);
-}); */
+});
 
-var IPs = { v4:[], v6:[]};
-
-function getInterfaceAddress() {
-  var interfaces = os.networkInterfaces();
-  var addresses = [];
-  for (k in interfaces) {
-    for (k2 in interfaces[k]) {
-      var address = interfaces[k][k2];
-      if (address.family == 'IPv4' && !address.internal &&
-          !address.address.match(/^10\./)) {
-        IPs.v4.push(address.address)
-      }
-      if (address.family == 'IPv6' && !address.internal && 
-          !address.address.match(/^fe80/i)) {
-        IPs.v6.push(address.address)
-      }
-    }
-  }
-}
 
 process.on('exit', function () {
   console.log('process exiting...');
@@ -64,10 +43,7 @@ app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
 app.use(app.router);
-app.use(require('stylus').middleware({debug: true,
-  src:__dirname + '/public',
-  dst:__dirname + '/public'})
-    );
+app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
