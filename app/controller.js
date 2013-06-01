@@ -101,7 +101,7 @@ module.exports = {
       if (err) {
         res.render('unsuscribe', {err: '不存在的订阅邮箱'});
       } else {
-        res.render('unsubscribe', {mail: email});
+        res.render('unsubscribe', {mail: email, err: null});
       }
     });
   }
