@@ -12,7 +12,6 @@ var template = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../view
 
 var salt = config.option.salt;
 var page_num = config.option.page_num || 30;
-var md5 = crypto.createHash('md5');
 
 function getTweets(page, cb) {
   Tweet.find({status: 1})
@@ -92,6 +91,7 @@ module.exports = {
   unsubscribe: function (req, res) {
     var email = req.param('mail');
     var hash = req.param('hash');
+    var md5 = crypto.createHash('md5');
     md5.update(salt + email);
     if (md5.digest('base64') != hash) {
       res.render('unsuscribe', {err: '非法的取消订阅请求'});

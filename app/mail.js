@@ -15,7 +15,6 @@ var transport = nodemailer.createTransport("SMTP", {
 module.exports = function(model, config) {
   var model = model;
   var salt = config.salt?config.salt:'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq';
-  var md5 = crypto.createHash('md5');
   var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'), {encoding: 'utf-8'});
   var fn = jade.compile(fileStr);
 
@@ -82,6 +81,7 @@ module.exports = function(model, config) {
           model.Tweet.update({status:1, sended: false}, {sended: true}, { multi: true }, function(){});
           function sendOne(address) {
             var html = content;
+            var md5 = crypto.createHash('md5');
             md5.update(salt + address);
             html += encodeURI(address);
             html += '&hash=' + md5.digest('base64');
