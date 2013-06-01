@@ -12,12 +12,12 @@ var controller = require('./app/controller');
 var mail = require('./app/mail');
 
 process.on('uncaughtException', function (e) {
-  console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + 'EXCEPTION: ' + e);
+  console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + 'EXCEPTION: ' + e.stack);
   sendmail({
     address: 'tristones.liu@gmail.com', 
     sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
-    text: '>>> ' + e
-    }, process.exit);
+    text: '>>> ' + e.stack
+    });
 });
 
 

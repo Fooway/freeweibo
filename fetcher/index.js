@@ -54,6 +54,7 @@ function check() {
       }
 
       function update_status (err, response, tweet) {
+        if (!response) return;
         if ((response.error) &&(
            (response.error_code == 20112) || //由于作者隐私设置，你没有权限查看此微博
            (response.error_code == 20132) || //抱歉，该内容暂时无法查看。如需帮助，请联系客服
@@ -84,6 +85,9 @@ function check() {
         setTimeout(function() {
           console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] checking tweet [ ' + tweet.tid + ']... ');
           api.getTweetById(tweet.tid, function(err, data) {
+            if (err) {
+              console.error('check tweet ' + tweet.tid  + 'error:' + err);
+            }
             update_status(err, data, tweet); cb();
           });
         }, API_REQUEST_INTERVAL_BY_SEC * 1000);
@@ -263,7 +267,7 @@ function fetchUser(option, cb) {
       option.screen_name = option.name;
       delete option.name;
       api.getUserInfo(option, function(err, user) {
-        if (err || user.error) {
+        if (err || (user && user.error)) {
           var error = err || user.error;
           console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
         } else {
