@@ -101,8 +101,8 @@ module.exports = function(model, config) {
   function sendErrorLog() {
     setTimeout(sendErrorLog, 24*60*60*1000);
     var date = new Date();
-    var path = path.normalize(__dirname + '/../logs/');
-    fs.readFile(path + 'error.log', {encoding: 'utf-8'}, function(err, data) {
+    var logpath = path.normalize(__dirname + '/../logs/');
+    fs.readFile(logpath + 'error.log', {encoding: 'utf-8'}, function(err, data) {
       if (err) {
         console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
         return;
@@ -112,8 +112,8 @@ module.exports = function(model, config) {
             text: data
       }, function() {
         // backup log
-        fs.rename(path + 'error.log', 
-          path + 'error-' + date.getFullYear() + '-' +
+        fs.rename(logpath + 'error.log', 
+          logpath + 'error-' + date.getFullYear() + '-' +
           date.getMonth + '-' + date.getDate() + 
           date.getHours + '-' + date.getMinutes() + '.log');
       });

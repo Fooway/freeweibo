@@ -66,7 +66,7 @@ function check() {
           model.User.update({uid: tweet.attributed_uid},
             {$inc:{delete_attributed:1}}, {upsert: false},function(){});
           console.log('tweet ' + tweet.tid + ' unavailabe');
-          fetchUser({uid: tweet.user.id}, function(){});
+          fetchUser({uid: tweet.user_id}, function(){});
         }
         if (response.id) {
           model.Tweet.update(
