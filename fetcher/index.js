@@ -85,10 +85,10 @@ function check() {
         setTimeout(function() {
           console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] checking tweet [ ' + tweet.tid + ']... ');
           api.getTweetById(tweet.tid, function(err, data) {
-            if (err) {
-              console.error('check tweet ' + tweet.tid  + 'error:' + err);
+            if (!err) {
+              update_status(err, data, tweet); 
             }
-            update_status(err, data, tweet); cb();
+            cb();
           });
         }, API_REQUEST_INTERVAL_BY_SEC * 1000);
       }, done);

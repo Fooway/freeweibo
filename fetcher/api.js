@@ -166,7 +166,6 @@ module.exports = function() {
 
         async.map(files, function(item, cb) {
           request(item.remote,
-                  {localAddress:IPs.v6[0] || IPs.v4[0]}, 
                   function (error, response, body) {
                     if(error){
                       console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
@@ -189,11 +188,7 @@ module.exports = function() {
 // request api function
 function get(url, callback) {
   console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
-  https.get({
-    host: api.host,
-    localAddress: api.localAddress,
-    path: url
-  }, function(res) {
+  https.get('https://' + api.host + url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
     res.on('end', function() {
