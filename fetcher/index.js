@@ -236,7 +236,7 @@ function deleteOld() {
   .exec(function(err, tweets) {
     if (err) {
       console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
-      setTimeout(deleteOld, 1*60*60*1000);
+      setTimeout(deleteOld, 2*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
         model.Tweet.remove({tid: tweet.tid});

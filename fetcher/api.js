@@ -189,10 +189,11 @@ module.exports = function() {
 // request api function
 function get(url, callback) {
   console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
-  https.get({
+  https.request({
     host: api.host,
     localAddress: api.localAddress,
-    path: url
+    path: url,
+    method: 'GET'
   }, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
