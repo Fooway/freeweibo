@@ -14,6 +14,7 @@ var path = require('path');
 var mkdirp= require('mkdirp');
 
 var IPs = { v4:[], v6:[]};
+var log;
 
 getInterfaceAddress();
 
@@ -111,7 +112,7 @@ module.exports = function() {
         option = {};
       }
       get(generateUrl('user_tweets', option), function(err, data) { 
-        if (err || !data.statuses)  {
+        if (err)  {
           callback(err);
           return;
         }
@@ -123,7 +124,7 @@ module.exports = function() {
     getTweetById: function(id, callback) {
       get(generateUrl('get_tweet', {id: id}), function(err, data) { 
         if (err) { 
-          callback(err, null);
+          callback(err);
           return;
         }
         callback(null,data);
@@ -166,14 +167,14 @@ module.exports = function() {
 
         async.map(files, function(item, cb) {
           request(item.remote,
-                  function (error, response, body) {
-                    if(error){
-                      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
+                  function (err, response, body) {
+                    if(err){
+                      log.error(err);
                     }
                   }).pipe(fs.createWriteStream(item.local));
                   cb();
         }, function(results) {
-          console.log('file ' + base_name + ' save done!');
+          log.info('file ' + base_name + ' save done!');
         });
 
       } else {
@@ -181,7 +182,13 @@ module.exports = function() {
       }
 
     },
-    imagePath: imagePath
+
+    imagePath: imagePath,
+
+    setLog: function(log_para) {
+      log = log_para;
+    }
+
   }
 };
 
@@ -194,7 +201,11 @@ function get(url, callback) {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      callback(null, data);
+      if (data.error) {
+        callback(data.error);
+      } else {
+        callback(null, data);
+      }
       buffer = [];
     })
   }).on('error', function(e) {

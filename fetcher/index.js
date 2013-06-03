@@ -34,6 +34,7 @@ var fetcher = module.exports = function (db, config) {
     timeConfig(config.option);
     tweeters = config.tweeters;
     log = config.log;
+    api.setLog(log);
   }
 
   fetch();
@@ -43,7 +44,6 @@ var fetcher = module.exports = function (db, config) {
 
 // check all the tweets' status in db.
 function check() {
-  console.log('start check... ');
   log.info('start check... ');
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
@@ -122,7 +122,7 @@ function fetch() {
     }
     async.eachSeries(users, function(user, cb) {
       setTimeout(function() { 
-        log.info('[ '+ (new Date()).toLocaleTimeString() + ' ] fetching user [ ' + user.name + ']... ');
+        log.info('fetching user [ ' + user.name + ']... ');
         fetchTweets(user, function() {
           cb();});
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
@@ -136,10 +136,13 @@ function fetch() {
 // api get wrapper for getting user's latest tweets
 function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
-    if (err || !tweets || !tweets.length) { 
+    if (err || !tweets.length) { 
       if (err) {
         log.error(err);
       } 
+      if (!tweets.length) {
+        log.info('no new tweets.');
+      }
       callback();
       return;
     }

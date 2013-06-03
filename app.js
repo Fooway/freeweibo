@@ -17,8 +17,7 @@ var log = new log4node.Log4Node({level: 'info', file: path.normalize(__dirname +
 config.log = log;
 
 process.on('uncaughtException', function (e) {
-  console.error('EXCEPTION: ' + e.stack);
-  log.error(err.stack);
+  log.error(e.stack);
   sendmail({
     address: 'tristones.liu@gmail.com', 
     sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
@@ -28,7 +27,7 @@ process.on('uncaughtException', function (e) {
 
 
 process.on('exit', function () {
-  console.log('process exiting...');
+  log.info('process exiting...');
 });
 
 // first, boot fetcher
@@ -57,7 +56,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/about', function(req, res) { res.render('about', {title: 'About'}); });
+app.get('/about', function(req, res) { res.render('about', {title: 'About | freeWeibo'}); });
 app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
 app.get('/subscribe', controller.subscribe);
