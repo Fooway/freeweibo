@@ -56,7 +56,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/about', function(req, res) { res.render('about', {title: 'About | freeWeibo'}); });
+app.get('/about', controller.about);
 app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
 app.get('/subscribe', controller.subscribe);

@@ -105,5 +105,8 @@ module.exports = {
         res.render('unsubscribe', {mail: email, err: null});
       }
     });
-  }
+  },
+
+  // GET: [/about]
+  about: function(req, res) { res.render('about', {title: 'About | freeWeibo'});} 
 };
