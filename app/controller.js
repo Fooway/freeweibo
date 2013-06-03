@@ -63,7 +63,7 @@ module.exports = {
     });
   },
 
-  // POST: [/]
+  // get: [/tweets]
   getPage: function(req, res) {
     var page = req.param('page');
     getTweets(page, function(err, tweets) {
@@ -80,7 +80,7 @@ module.exports = {
     });
   },
 
-  // POST: subscribe email to tweets [/subscribe]:
+  // GET: subscribe email to tweets [/subscribe]:
   subscribe: function(req, res) {
     var email = req.param('email');
     model.Mail.update({address: email}, {address: email}, { upsert: true }, function(err,mail) {
@@ -88,6 +88,7 @@ module.exports = {
     });
   },
 
+  // GET: [/cancel?:email:hash]
   unsubscribe: function (req, res) {
     var email = req.param('mail');
     var hash = req.param('hash');

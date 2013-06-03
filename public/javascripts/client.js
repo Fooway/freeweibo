@@ -29,7 +29,7 @@ $(function () {
     var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
     var address = $('#mail').val().replace(/^\s+|\s+$/g,'');
     if (pattern.test(address)) {
-      $.post('/subscribe', { email: address}, function(res) {
+      $.get('/subscribe', { email: address}, function(res) {
         if (res.err) {
           $("#alert").text('订阅失败！').css('color', 'red').show();
         } else {
@@ -59,21 +59,21 @@ $(function () {
       return;
     }
     page_num++;
-    $.post('/', {page: page_num}, function(data) {
+    $.get('/tweets', {page: page_num}, function(data) {
       spinner.stop();
       if (data.err) {
-        $('.tweets').append('<p style="text-align:center;">' + data.err + '</p>');
+        $('.tweets').append('<p class="alert">' + data.err + '</p>');
         return;
       }
       if (data.tweets == '') {
-        $('.tweets').append('<p style="text-align:center;">所有记录已加载</p>');
+        $('.tweets').append('<p class="alert">所有记录已加载</p>');
         return;
       }
       $('.tweets').append(data.tweets);
       current_page++;
     }).fail(function() {
       spinner.stop();
-      $('.tweets').append('<p style="text-align:center;">加载失败</p>');
+      $('.tweets').append('<p class="alert">加载失败</p>');
     });
   }
 

@@ -57,6 +57,10 @@ body .header #alert {
 body .tweets {
   margin: 0;
 }
+body .tweets p.alert {
+  text-align: center;
+  margin-top: 20px;
+}
 body .tweets li {
   margin-bottom: 10px;
   border-bottom: 1px solid #ccc;

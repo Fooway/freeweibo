@@ -8,6 +8,7 @@ var async = require('async');
 
 // mongodb model
 var model = {};
+var log;
 var tweeters = [];
 var DELETE_INTERVAL_BY_DATE = 5;
 var FETCH_INTERVAL_BY_MINUTE = 20; 
@@ -32,6 +33,7 @@ var fetcher = module.exports = function (db, config) {
   if (config) {
     timeConfig(config.option);
     tweeters = config.tweeters;
+    log = config.log;
   }
 
   fetch();
@@ -41,7 +43,8 @@ var fetcher = module.exports = function (db, config) {
 
 // check all the tweets' status in db.
 function check() {
-  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start check... ')
+  console.log('start check... ');
+  log.info('start check... ');
   var now = (new Date()).valueOf();
   model.Tweet.find({status: 0})
     .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
@@ -65,7 +68,7 @@ function check() {
           // increment users delete_attribute
           model.User.update({uid: tweet.attributed_uid},
             {$inc:{delete_attributed:1}}, {upsert: false},function(){});
-          console.log('tweet ' + tweet.tid + ' unavailabe');
+          log.info('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user_id}, function(){});
         }
         if (response.id) {
@@ -83,7 +86,7 @@ function check() {
         // so we will not exceed the api access frequency
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
-          console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] checking tweet [ ' + tweet.tid + ']... ');
+          log.info('checking tweet [ ' + tweet.tid + ']... ');
           api.getTweetById(tweet.tid, function(err, data) {
             if (!err) {
               update_status(err, data, tweet); 
@@ -97,14 +100,14 @@ function check() {
 
 // fetch tweets for users
 function fetch() {
-  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start fetch...');
+  log.info('start fetch...');
   model.User.find(function(err, users) {
     if (err) {
       console.error(err.message);
       return;
     }
     if (users.length == 0) {
-      console.log('initialize tweeters...');
+      log.info('initialize tweeters...');
       async.eachSeries(tweeters, function(tweeter, cb) {
         // need to delay 1s for each tweet
         // so we will not exceed the api access frequency
@@ -119,7 +122,7 @@ function fetch() {
     }
     async.eachSeries(users, function(user, cb) {
       setTimeout(function() { 
-        console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] fetching user [ ' + user.name + ']... ');
+        log.info('[ '+ (new Date()).toLocaleTimeString() + ' ] fetching user [ ' + user.name + ']... ');
         fetchTweets(user, function() {
           cb();});
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
@@ -135,16 +138,16 @@ function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
     if (err || !tweets || !tweets.length) { 
       if (err) {
-        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+        log.error(err);
       } 
       callback();
       return;
     }
 
-    console.log('fetched ' + tweets.length + ' tweets.');
+    log.info('fetched ' + tweets.length + ' tweets.');
     model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(err) {
       if (err) { 
-        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+        log.error(err);
       }
     });
 
@@ -187,7 +190,7 @@ function saveTweet(tweet, cb) {
         try {
           time = new Date(tweet.created_at);
         } catch(e) {
-          console.err(e);
+          log.error(e);
           time  = new Date();
         }
 
@@ -208,7 +211,7 @@ function saveTweet(tweet, cb) {
           attributed_uid: attributed
         }, function(err, newtweet) {
           if (err) {
-            console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+            log.error(err);
           }
           cb();
         });
@@ -220,7 +223,7 @@ function saveTweet(tweet, cb) {
 }
 
 function deleteOld() {
-  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start deleting old tweets...');
+  log.info('start deleting old tweets...');
   var now = (new Date()).valueOf();
 
   // first, remove all old tweets with no image
@@ -235,17 +238,17 @@ function deleteOld() {
   .select('tid image_name')
   .exec(function(err, tweets) {
     if (err) {
-      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+      log.error(err);
       setTimeout(deleteOld, 2*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
         model.Tweet.remove({tid: tweet.tid});
         var files = api.imagePath(tweet.image_name);
 
-        console.log('deleting tweet: ' + tweet.tid);
+        log.info('deleting tweet: ' + tweet.tid);
 
         for (var i = 0; i < files.length; i++) {
-          console.log('deleting ' + files[i]);
+          log.info('deleting ' + files[i]);
           fs.unlink(files[i]);
         };
         cb();
@@ -259,7 +262,7 @@ function deleteOld() {
 function fetchUser(option, cb) {
   model.User.find(option, function(err, user) {
     if (err) {
-      console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+      log.error(err);
       cb();
       return;
     }
@@ -269,10 +272,10 @@ function fetchUser(option, cb) {
       api.getUserInfo(option, function(err, user) {
         if (err || (user && user.error)) {
           var error = err || user.error;
-          console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + error);
+          log.error(error);
         } else {
           if (user.followers_count > FOLLOWER_THRESHOLD) {
-            console.log('add ' + user.screen_name + ', has ' +
+            log.info('add ' + user.screen_name + ', has ' +
                   user.followers_count + ' followers.');
             var newuser = new model.User({
               name: user.screen_name, 
@@ -286,7 +289,7 @@ function fetchUser(option, cb) {
               friends_cnt: user.friends_count,
               tweets_cnt: user.statuses_count
             });
-            newuser.save(function (err, user) { if(err) console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);});
+            newuser.save(function (err, user) { if(err) log.error(err);});
             }
         }
         cb();

@@ -10,9 +10,15 @@ var fetcher = require('./fetcher');
 var config = require('./app/config');
 var controller = require('./app/controller');
 var mail = require('./app/mail');
+var log4node = require('log4node');
+
+var log = new log4node.Log4Node({level: 'info', file: path.normalize(__dirname + '/logs/run.log')});
+
+config.log = log;
 
 process.on('uncaughtException', function (e) {
-  console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + 'EXCEPTION: ' + e.stack);
+  console.error('EXCEPTION: ' + e.stack);
+  log.error(err.stack);
   sendmail({
     address: 'tristones.liu@gmail.com', 
     sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
@@ -51,14 +57,12 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/about', function(req, res) {
-  res.render('about');
-});
+app.get('/about', function(req, res) { res.render('about', {title: 'About'}); });
+app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
+app.get('/subscribe', controller.subscribe);
 app.get('/', controller.index);
-app.post('/', controller.getPage);
-app.post('/subscribe', controller.subscribe);
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  log.info('Express server listening on port ' + app.get('port'));
 });

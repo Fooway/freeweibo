@@ -187,7 +187,6 @@ module.exports = function() {
 
 // request api function
 function get(url, callback) {
-  console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] >> GET: ' + url);
   https.get('https://' + api.host + url, function(res) {
     var buffers = [];
     res.on('data', function(chunk) { buffers.push(chunk); });
@@ -195,13 +194,10 @@ function get(url, callback) {
       var buffer = Buffer.concat(buffers);
       data = JSON.parse(buffer.toString());
       // debug point
-      //console.log(buffer.toString());
-
       callback(null, data);
       buffer = [];
     })
   }).on('error', function(e) {
-    console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + e);
     callback(e, null);
   });
 }

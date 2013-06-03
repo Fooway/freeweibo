@@ -1,8 +1,10 @@
 var nodemailer = require('nodemailer');
 var jade = require('jade');
 var fs = require('fs');
+var spawn = require('child_process').spawn;
 var path = require('path');
 var crypto = require('crypto');
+var cronJob = require('cron').CronJob;
 
 var transport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
@@ -14,12 +16,20 @@ var transport = nodemailer.createTransport("SMTP", {
 
 module.exports = function(model, config) {
   var model = model;
+  var log = config.log;
   var salt = config.salt?config.salt:'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq';
   var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'), {encoding: 'utf-8'});
   var fn = jade.compile(fileStr);
 
-  sendSubscribeMails();
-  setTimeout(sendErrorLog, 4*60*60*1000);
+  var job = new cronJob({
+    cronTime: '00 30 11 * * *',
+    onTick: function() {
+        // Runs every day at 11:30:00 AM. 
+      sendSubscribeMails();
+      sendErrorLog();
+    },
+    start: true
+  });
 
   var mail = function(option, cb) {
     transport.sendMail({
@@ -30,9 +40,9 @@ module.exports = function(model, config) {
       html: option.html || ''
     }, function(err, response){
       if (err) {
-        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
+        log.error(err);
       } else {
-        console.log('message sended for ' + option.address);
+        log.info('message sended for ' + option.address);
       }
       cb?cb():null;
     });
@@ -42,25 +52,24 @@ module.exports = function(model, config) {
 
   function sendSubscribeMails() {
 
-    console.log('[ '+ (new Date()).toLocaleTimeString() + ' ] start send digest to emails...');
-    setTimeout(sendSubscribeMails, 24*60*60*1000);
+    log.info('start send digest to emails...');
     model.Tweet.find({status: 1, sended: false })
       .limit(10)
       .sort('-delete_time')
       .exec(function(err, tweets) {
         if (err || tweets.length == 0) {
-          console.error(err?err:'no tweets to send');
+          log.error(err?err:'no tweets to send');
           return;
         }
 
         if (tweets.length <= 5) {
-          console.error(err?err:'tweets too less to send');
+          log.error(err?err:'tweets too less to send');
           return;
         }
 
         model.Mail.find(function (err, mails) {
           if (err || mails.length == 0) {
-            console.error(err?err:'no subscribers to send');
+            log.error(err?err:'no subscribers to send');
             return;
           }
 
@@ -99,23 +108,17 @@ module.exports = function(model, config) {
   }
 
   function sendErrorLog() {
-    setTimeout(sendErrorLog, 24*60*60*1000);
     var date = new Date();
-    var logpath = path.normalize(__dirname + '/../logs/');
-    fs.readFile(logpath + 'error.log', {encoding: 'utf-8'}, function(err, data) {
-      if (err) {
-        console.error('[' + (new Date()).toLocaleString('en-US') + '] ' + err);
-        return;
-      }
+    var errors = '';
+    var logfile = path.normalize(__dirname + '/../logs/') + 'run.log';
+    var child_grep = spawn('grep ERROR ' + logfile);
+    child_grep.on('data', function(data) {
+      errors += data;
+    });
+    child_grep.on('close', function() {
       mail({address: 'tristones.liu@gmail.com', 
-            subject: 'ErrorLog >> ' + date.toLocaleString('en-US'),
-            text: data
-      }, function() {
-        // backup log
-        fs.rename(logpath + 'error.log', 
-          logpath + 'error-' + date.getFullYear() + '-' +
-          date.getMonth + '-' + date.getDate() + 
-          date.getHours + '-' + date.getMinutes() + '.log');
+            subject: 'freeWeibo ErrorLog >> ' + date.toLocaleString('en-US'),
+            text: errors
       });
     });
   }

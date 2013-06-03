@@ -7,7 +7,7 @@ NODE=/usr/bin/node
 test -x $NODE || exit 0
 
 function start_app {
-  DEBUG=fetcher NODE_ENV=production nohup "$NODE" "$DIR/app.js" 1>>"$DIR/logs/run.log" 2>>"$DIR/logs/errors.log" &
+  DEBUG=fetcher NODE_ENV=production nohup "$NODE" "$DIR/app.js" &
   echo $! > "$DIR/pids/filterback.pid"
 }
 
