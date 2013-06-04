@@ -9,6 +9,10 @@ block content
         ul.tweets
           each tweet in tweets
             include templates/tweet
+        script
+          $(function() {
+            new FetchTweet('.tweets', '#load-spin');
+            })
       .span3
         ul.users
           each user in users

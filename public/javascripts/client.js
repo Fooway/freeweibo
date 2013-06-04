@@ -1,5 +1,4 @@
-$(function () {
-
+function FetchTweet(container, spin) {
   // spinner
   var opts = {
     lines: 13, // The number of lines to draw
@@ -20,36 +19,9 @@ $(function () {
     left: 'auto' // Left position relative to parent in px
   };
 
-  var target = document.getElementById('load-spin');
+  var target = document.getElementById(spin);
   var spinner;
 
-  // subscribe function
-  $('#subscribe').on('click', function () {
-    // body...
-    var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
-    var address = $('#mail').val().replace(/^\s+|\s+$/g,'');
-    if (pattern.test(address)) {
-      $.get('/subscribe', { email: address}, function(res) {
-        if (res.err) {
-          $("#alert").text('订阅失败！').css('color', 'red').show();
-        } else {
-          $("#alert").text('订阅成功！').css('color', 'green').show();
-        }
-        $('#mail').val('');
-        setTimeout(function() {
-          $('#alert').fadeOut(2000);
-        }, 1000);
-        
-      });
-    }
-    else {
-      $("#alert").text('无效的地址!').css('color', 'red').show();
-      $('#mail').val('');
-      setTimeout(function() {
-        $('#alert').fadeOut(2000);
-      }, 1000);
-    }
-  });
 
   var page_num = 0;
   var current_page = 0;
@@ -59,22 +31,20 @@ $(function () {
       return;
     }
     page_num++;
-    $.get('/tweets', {page: page_num}, function(data) {
-      spinner.stop();
+    $.get(container, {page: page_num}, function(data) {
       if (data.err) {
-        $('.tweets').append('<p class="alert">' + data.err + '</p>');
+        $(container).append('<p class="alert">' + data.err + '</p>');
         return;
       }
       if (data.tweets == '') {
-        $('.tweets').append('<p class="alert">所有记录已加载</p>');
+        $(container).append('<p class="alert">所有记录已加载</p>');
         return;
       }
-      $('.tweets').append(data.tweets);
+      $(container).append(data.tweets);
       current_page++;
     }).fail(function() {
-      spinner.stop();
-      $('.tweets').append('<p class="alert">加载失败</p>');
-    });
+      $(container).append('<p class="alert">加载失败</p>');
+    }).always(function() { spinner.stop(); });
   }
 
   $(window).scroll((function() {
@@ -84,8 +54,8 @@ $(function () {
     return function() {
       clearTimeout(timerID);
       timerID = setTimeout(function() {
-        if($(window).scrollTop() >= $('.tweets').offset().top + $('.tweets').height() - $(window).height()) {
-          opts.top = $('.tweets').height() + 70;
+        if($(window).scrollTop() >= $(container).offset().top + $(container).height() - $(window).height()) {
+          opts.top = $(container).height() + 70;
           spinner = new Spinner(opts).spin(target);
           getTweets();
         }
@@ -93,14 +63,44 @@ $(function () {
     };
   })());
 
-  $('.tweets').on('click', '.thumb_img', function() {
+  $(container).on('click', '.thumb_img', function() {
     $(this).hide();
     $(this).next().show();
   });
 
-  $('.tweets').on('click', '.middle_img', function() {
+  $(container).on('click', '.middle_img', function() {
     $(this).hide();
     $(this).prev().show();
   });
+}
 
-})
+function EmailSubscribe(mail_bx, btn, tip_spn) {
+  // subscribe function
+  $(btn).on('click', function () {
+    // body...
+    var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
+    var address = $(mail_bx).val().replace(/^\s+|\s+$/g,'');
+    if (pattern.test(address)) {
+      $.get('/subscribe', { email: address}, function(res) {
+        if (res.err) {
+          $(tip_spn).text('订阅失败！').css('color', 'red').show();
+        } else {
+          $(tip_spn).text('订阅成功！').css('color', 'green').show();
+        }
+        $(mail_bx).val('');
+        setTimeout(function() {
+          $(tip_spn).fadeOut(2000);
+        }, 1000);
+
+      });
+    }
+    else {
+      $(tip_spn).text('无效的地址!').css('color', 'red').show();
+      $(mail_bx).val('');
+      setTimeout(function() {
+        $(tip_spn).fadeOut(2000);
+      }, 1000);
+    }
+  });
+}
+
