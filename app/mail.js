@@ -14,7 +14,7 @@ module.exports = function(model, config) {
   var fn = jade.compile(fileStr);
 
   new cronJob({
-    cronTime: '30 11 * * * *',
+    cronTime: '00 30 11 * * *',
     onTick: function() {
       // Runs every day at 11:30:00 AM. 
       sendSubscribeMails();
@@ -24,7 +24,7 @@ module.exports = function(model, config) {
   });
 
   new cronJob({
-    cronTime: '30 01 15 * * *',
+    cronTime: '00 00 03 * * 2,6',
     onTick: function() {
       // Runs every month day 15 at 01:30:00 AM. 
       deleteUsers();
@@ -121,7 +121,7 @@ module.exports = function(model, config) {
     var date = new Date();
     var errors = '';
     var logfile = path.normalize(__dirname + '/../logs/') + 'run.log';
-    var child_grep = spawn('grep ERROR ' + logfile);
+    var child_grep = spawn('grep', ['ERROR', logfile]);
     child_grep.on('data', function(data) {
       errors += data;
     });
@@ -136,7 +136,7 @@ module.exports = function(model, config) {
   function deleteUsers() {
     var dateValue = (new Date()).valueOf();
     var interval = 20 * 24 * 60 * 60 * 1000;
-    model.users.find({delete_attributed:0})
+    model.User.find({delete_attributed:0})
      .where('created_date').lt(dateValue - interval)
      .select('name uid')
      .exec(function(err, users) {
@@ -145,7 +145,7 @@ module.exports = function(model, config) {
        }
        for (var i = 0; i < users.length; i++) {
          log.info('removing user [' + user[i].name + ']');
-         model.users.remove({uid: user[i].uid});
+         model.User.remove({uid: user[i].uid});
        };
      });
   }
