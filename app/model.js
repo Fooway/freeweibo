@@ -24,7 +24,8 @@ module.exports = function(url) {
     followers_cnt: Number,
     friends_cnt: Number,
     tweets_cnt: Number,
-    delete_attributed: {type:Number, default:0}
+    delete_attributed: {type:Number, default:0}, // how many tweets or retweets of this user which are deleted 
+    created_date:{type:Number, default:0} // time user created at this server
   });
 
   model.Tweet = mongoose.model('Tweet', {

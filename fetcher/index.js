@@ -289,7 +289,8 @@ function fetchUser(option, cb) {
               gender: user.gender,
               followers_cnt: user.followers_count,
               friends_cnt: user.friends_count,
-              tweets_cnt: user.statuses_count
+              tweets_cnt: user.statuses_count,
+              created_date: (new Date()).valueOf()
             });
             newuser.save(function (err, user) { if(err) log.error(err);});
             }

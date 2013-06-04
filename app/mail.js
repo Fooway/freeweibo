@@ -13,12 +13,21 @@ module.exports = function(model, config) {
   var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'), {encoding: 'utf-8'});
   var fn = jade.compile(fileStr);
 
-  var job = new cronJob({
-    cronTime: '00 30 11 * * *',
+  new cronJob({
+    cronTime: '30 11 * * * *',
     onTick: function() {
-        // Runs every day at 11:30:00 AM. 
+      // Runs every day at 11:30:00 AM. 
       sendSubscribeMails();
       sendErrorLog();
+    },
+    start: true
+  });
+
+  new cronJob({
+    cronTime: '30 01 15 * * *',
+    onTick: function() {
+      // Runs every month day 15 at 01:30:00 AM. 
+      deleteUsers();
     },
     start: true
   });
@@ -122,5 +131,22 @@ module.exports = function(model, config) {
             text: errors
       });
     });
+  }
+
+  function deleteUsers() {
+    var dateValue = (new Date()).valueOf();
+    var interval = 20 * 24 * 60 * 60 * 1000;
+    model.users.find({delete_attributed:0})
+     .where('created_date').lt(dateValue - interval)
+     .select('name uid')
+     .exec(function(err, users) {
+       if (err) {
+         return;
+       }
+       for (var i = 0; i < users.length; i++) {
+         log.info('removing user [' + user[i].name + ']');
+         model.users.remove({uid: user[i].uid});
+       };
+     });
   }
 }
