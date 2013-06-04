@@ -49,7 +49,7 @@ function check() {
   model.Tweet.find({status: 0})
     .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
     .sort('-create_at')
-    .select('tid')
+    .select('tid attributed_uid user_id')
     .exec(function(err, tweets) {
       function done(results) {
         setTimeout(check, CHECK_INTERVAL_BY_MINUTE * 60 * 1000);
@@ -109,7 +109,7 @@ function fetch() {
     if (users.length == 0) {
       log.info('initialize tweeters...');
       async.eachSeries(tweeters, function(tweeter, cb) {
-        // need to delay 1s for each tweet
+        // need to delay for each tweet
         // so we will not exceed the api access frequency
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
