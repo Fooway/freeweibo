@@ -24,7 +24,7 @@ module.exports = function(url) {
     followers_cnt: Number,
     friends_cnt: Number,
     tweets_cnt: Number,
-    delete_attributed: Number
+    delete_attributed: {type:Number, default:0}
   });
 
   model.Tweet = mongoose.model('Tweet', {
