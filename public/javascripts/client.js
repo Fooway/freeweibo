@@ -31,7 +31,7 @@ function FetchTweet(container, spin) {
       return;
     }
     page_num++;
-    $.get(container, {page: page_num}, function(data) {
+    $.get('/tweets', {page: page_num}, function(data) {
       if (data.err) {
         $(container).append('<p class="alert">' + data.err + '</p>');
         return;

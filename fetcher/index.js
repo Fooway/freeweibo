@@ -136,13 +136,12 @@ function fetch() {
 // api get wrapper for getting user's latest tweets
 function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
-    if (err || !tweets.length) { 
-      if (err) {
-        log.error(err);
-      } 
-      if (!tweets.length) {
-        log.info('no new tweets.');
-      }
+    if (err) { 
+      callback();
+      return;
+    }
+    if (tweets && !tweets.length) {
+      log.info('no new tweets.');
       callback();
       return;
     }
