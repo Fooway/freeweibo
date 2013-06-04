@@ -10,7 +10,7 @@ block content
             include templates/tweet
         script
           $(function() {
-            new freeWeibo.FetchTweets('.tweets');
+            new (freeWeibo.FetchTweets())('.tweets');
             })
       .span3
         ul.users

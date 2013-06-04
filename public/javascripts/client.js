@@ -1,11 +1,19 @@
-var window.freeWeibo = {
+window.freeWeibo = {
   
-  FetchTweets: function(container) {
+  FetchTweets: function() {
 
-    this.init();
+    function Fetcher(container) {
+      this.container = container;
+      this.target = $('<div id="spin"></div>').insertBefore($(this.container))[0];
+      this.spinner = null;
+      this.page_num = 0;
+      this.current_page = 0;
+      this.registerEvent();
+    }
+
 
     // spinner
-    this.prototype.opts = {
+    Fetcher.prototype.opts = {
       lines: 13, // The number of lines to draw
       length: 10, // The length of each line
       width: 5, // The line thickness
@@ -24,18 +32,8 @@ var window.freeWeibo = {
       left: 'auto' // Left position relative to parent in px
     };
 
-    this.prototype.init = function () {
-      var self = this;
-      self.container = container;
-      self.target = $('<div id="spin"></div>').insertBefore($(self.container))[0];
-      self.spinner = null;
-      self.page_num = 0;
-      self.current_page = 0;
-      self.registerEvent();
-    }
 
-
-    this.prototype.registerEvent = function() {
+    Fetcher.prototype.registerEvent = function() {
       var self = this;
       $(window).scroll((function() {
         var timerID = null;
@@ -44,7 +42,7 @@ var window.freeWeibo = {
           clearTimeout(timerID);
           timerID = setTimeout(function() {
             if($(window).scrollTop() >= $(self.container).offset().top + $(self.container).height() - $(window).height()) {
-              opts.top = $(self.container).height() + 70;
+              self.opts.top = $(self.container).height() + 70;
               self.spinner = new Spinner(self.opts).spin(self.target);
               self.getTweets();
             }
@@ -63,7 +61,7 @@ var window.freeWeibo = {
       });
     };
 
-    this.prototype.getTweets = function() {
+    Fetcher.prototype.getTweets = function() {
       var self = this;
       if (self.page_num > self.current_page) {
         self.spinner.stop();
@@ -85,6 +83,8 @@ var window.freeWeibo = {
         $(self.container).append('<p class="alert">加载失败</p>');
       }).always(function() { self.spinner.stop(); });
     };
+
+    return Fetcher;
   },
 
   emailSubscribe: function(mail_bx, btn, tip_spn) {
@@ -114,5 +114,5 @@ var window.freeWeibo = {
       }
     });
   }
-}
+};
 
