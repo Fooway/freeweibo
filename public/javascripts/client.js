@@ -89,31 +89,32 @@ window.freeWeibo.FetchTweets = (function() {
 })();
 
 
-
-window.freeWeibo.emailSubscribe = function(mail_bx, btn, tip_spn) {
+window.freeWeibo.emailSubscribe = function(btn) {
   // subscribe function
+  var $mail = $(btn).prev();
+  var $alert = $(btn).parent('.input-append').next();
   $(btn).on('click', function () {
     // body...
     var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
-    var address = $(mail_bx).val().replace(/^\s+|\s+$/g,'');
+    var address = $mail.val().replace(/^\s+|\s+$/g,'');
     if (pattern.test(address)) {
       $.get('/subscribe', { email: address}, function(res) {
         if (res.err) {
-          $(tip_spn).text('订阅失败！').css('color', 'red').show();
+          $alert.text('订阅失败！').css('color', 'red').show();
         } else {
-          $(tip_spn).text('订阅成功！').css('color', 'green').show();
+          $alert.text('订阅成功！').css('color', 'green').show();
         }
-        $(mail_bx).val('');
+        $mail.val('');
         setTimeout(function() {
-          $(tip_spn).fadeOut(2000);
+          $alert.fadeOut(2000);
         }, 1000);
 
       });
     }
     else {
-      $(tip_spn).text('无效的地址!').css('color', 'red').show();
-      $(mail_bx).val('');
-      setTimeout(function() { $(tip_spn).fadeOut(2000); }, 1000);
+      $alert.text('无效的地址!').css('color', 'red').show();
+      $mail.val('');
+      setTimeout(function() { $alert.fadeOut(2000); }, 1000);
     }
   });
 };
