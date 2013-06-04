@@ -6,14 +6,6 @@ var path = require('path');
 var crypto = require('crypto');
 var cronJob = require('cron').CronJob;
 
-var transport = nodemailer.createTransport("SMTP", {
-    service: "Gmail",
-    auth: {
-        user: "freeweibo.me@gmail.com",
-        pass: "Everdance1983"
-    }
-});
-
 module.exports = function(model, config) {
   var model = model;
   var log = config.log;
@@ -32,6 +24,14 @@ module.exports = function(model, config) {
   });
 
   var mail = function(option, cb) {
+    var transport = nodemailer.createTransport("SMTP", {
+      service: "Gmail",
+        auth: {
+          user: "freeweibo.me@gmail.com",
+        pass: "Everdance1983"
+        }
+    });
+
     transport.sendMail({
       from: 'freeweibo.me@gmail.com',
       to: option.address,
@@ -45,6 +45,7 @@ module.exports = function(model, config) {
         log.info('message sended for ' + option.address);
       }
       cb?cb():null;
+      transport.close();
     });
   };
 
