@@ -5,13 +5,12 @@ block content
     include header
     .row-fluid 
       .span8
-        #load-spin
         ul.tweets
           each tweet in tweets
             include templates/tweet
         script
           $(function() {
-            new FetchTweet('.tweets', '#load-spin');
+            new freeWeibo.FetchTweets('.tweets');
             })
       .span3
         ul.users
