@@ -33,7 +33,9 @@ function  convert(tweets) {
     var date = new Date(tweets[i].create_at);
     tweets[i].date = date.toLocaleTimeString("en-US") + ' ' + date.getDate() +
                      '/' + (date.getMonth()+1) + '/' + date.getFullYear();
-    tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>');
+    if (tweets[i].text) {
+      tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>');
+    }
   };
 }
 module.exports = {

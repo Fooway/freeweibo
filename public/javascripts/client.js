@@ -41,6 +41,7 @@ window.freeWeibo.FetchTweets = (function() {
       return function() {
         clearTimeout(timerID);
         timerID = setTimeout(function() {
+          if (self.spinner) return;
           if($(window).scrollTop() >= $(self.container).offset().top + $(self.container).height() - $(window).height()) {
             self.opts.top = $(self.container).height() + 70;
             self.spinner = new Spinner(self.opts).spin(self.target);
@@ -65,6 +66,7 @@ window.freeWeibo.FetchTweets = (function() {
     var self = this;
     if (self.page_num > self.current_page) {
       self.spinner.stop();
+      self.spinner = null;
       return;
     }
     self.page_num++;
@@ -81,7 +83,10 @@ window.freeWeibo.FetchTweets = (function() {
       self.current_page++;
     }).fail(function() {
       $(self.container).append('<p class="alert">加载失败</p>');
-    }).always(function() { self.spinner.stop(); });
+    }).always(function() { 
+      self.spinner.stop(); 
+      self.spinner = null;
+    });
   };
 
   return Fetcher;
