@@ -111,9 +111,9 @@ module.exports = function() {
         callback = option;
         option = {};
       }
-      get(generateUrl('user_tweets', option), function(err, data) { 
-        if (err)  {
-          callback(err);
+      get(generateUrl('user_tweets', option), function(error, data) { 
+        if (error)  {
+          callback(error);
           return;
         }
         callback(null, data.statuses);
@@ -122,9 +122,9 @@ module.exports = function() {
 
     // get a tweet by tweet id
     getTweetById: function(id, callback) {
-      get(generateUrl('get_tweet', {id: id}), function(err, data) { 
-        if (err) { 
-          callback(err);
+      get(generateUrl('get_tweet', {id: id}), function(error, data) { 
+        if (error) { 
+          callback(error);
           return;
         }
         callback(null,data);
@@ -134,9 +134,9 @@ module.exports = function() {
 
     // get user info by screen_name or uid
     getUserInfo: function(option, callback) {
-      get(generateUrl('get_user', option), function(err, data) { 
-        if (err) { 
-          callback(err);
+      get(generateUrl('get_user', option), function(error, data) { 
+        if (error) { 
+          callback(error);
           return;
         }
         callback(null,data);
@@ -167,9 +167,9 @@ module.exports = function() {
 
         async.map(files, function(item, cb) {
           request(item.remote,
-                  function (err, response, body) {
-                    if(err){
-                      log.error(err);
+                  function (error, response, body) {
+                    if(error){
+                      log.error(error);
                     }
                   }).pipe(fs.createWriteStream(item.local));
                   cb();

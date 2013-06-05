@@ -11,17 +11,19 @@ var template = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../view
       {encoding: 'utf-8'}));
 
 var salt = config.option.salt;
-var page_num = config.option.page_num || 30;
+var confLimit = config.option.limit;
 
-function getTweets(page, cb) {
+function getTweets(option, cb) {
+  var offset = option.offset || 0;
+  var limit = option.limit || confLimit;
   Tweet.find({status: 1})
-    .limit(page_num)
-    .skip(page_num*page)
+    .limit(limit)
+    .skip(offset)
     .sort('-delete_time')
-    .exec(function(err, tweets) {
-      if (err) {
-        console.error(err.message);
-        cb(err);
+    .exec(function(error, tweets) {
+      if (error) {
+        console.error(error.message);
+        cb(error);
       } else {
         cb(null, tweets);
       }
@@ -44,13 +46,13 @@ module.exports = {
 
   // GET: [/]
   index: function(req, res) {
-    getTweets(0, function(err, tweets) {
-      if (err) {
+    getTweets({}, function(error, tweets) {
+      if (error) {
         res.redirect('404');
       } else {
-        User.find(function(err, users) {
-          if (err) {
-            console.error(err.message);
+        User.find(function(error, users) {
+          if (error) {
+            console.error(error.message);
             res.redirect('404');
           } else {
             convert(tweets);
@@ -67,17 +69,18 @@ module.exports = {
 
   // get: [/tweets]
   getPage: function(req, res) {
-    var page = req.param('page');
-    getTweets(page, function(err, tweets) {
-      if (err) {
-        res.send({err:'服务器出错，查询超时!'});
+    var offset = req.param('offset');
+    var limit = req.param('limit');
+    getTweets({offset: offset, limit: limit}, function(error, tweets) {
+      if (error) {
+        res.send({error:'服务器出错，查询超时!'});
       } else {
         convert(tweets);
         var result = '';
         for (var i = 0; i < tweets.length; i++) {
           result += template({tweet:tweets[i]});
         };
-        res.send({tweets:result});
+        res.send({tweets:result, count: tweets.length});
       }
     });
   },
@@ -85,8 +88,8 @@ module.exports = {
   // GET: subscribe email to tweets [/subscribe]:
   subscribe: function(req, res) {
     var email = req.param('email');
-    model.Mail.update({address: email}, {address: email}, { upsert: true }, function(err,mail) {
-      res.json({error: !!err});
+    model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error,mail) {
+      res.json({error: !!error});
     });
   },
 
@@ -97,14 +100,14 @@ module.exports = {
     var md5 = crypto.createHash('md5');
     md5.update(salt + email);
     if (md5.digest('base64') != hash) {
-      res.render('unsuscribe', {err: '非法的取消订阅请求'});
+      res.render('unsuscribe', {error: '非法的取消订阅请求'});
       return;
     }
-    model.Mail.remove({address: email}, function(err) {
-      if (err) {
-        res.render('unsuscribe', {err: '不存在的订阅邮箱'});
+    model.Mail.remove({address: email}, function(error) {
+      if (error) {
+        res.render('unsuscribe', {error: '不存在的订阅邮箱'});
       } else {
-        res.render('unsubscribe', {mail: email, err: null});
+        res.render('unsubscribe', {mail: email, error: null});
       }
     });
   },

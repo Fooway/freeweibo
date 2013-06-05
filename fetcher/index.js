@@ -50,13 +50,13 @@ function check() {
     .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
     .sort('-create_at')
     .select('tid attributed_uid user_id')
-    .exec(function(err, tweets) {
+    .exec(function(error, tweets) {
       function done(results) {
         setTimeout(check, CHECK_INTERVAL_BY_MINUTE * 60 * 1000);
         setTimeout(deleteOld, 60 * 60 * 1000);
       }
 
-      function update_status (err, response, tweet) {
+      function update_status (error, response, tweet) {
         if (!response) return;
         if ((response.error) &&(
            (response.error_code == 20112) || //由于作者隐私设置，你没有权限查看此微博
@@ -87,9 +87,9 @@ function check() {
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
           log.info('checking tweet [ ' + tweet.tid + ']... ');
-          api.getTweetById(tweet.tid, function(err, data) {
-            if (!err) {
-              update_status(err, data, tweet); 
+          api.getTweetById(tweet.tid, function(error, data) {
+            if (!error) {
+              update_status(error, data, tweet); 
             }
             cb();
           });
@@ -101,9 +101,9 @@ function check() {
 // fetch tweets for users
 function fetch() {
   log.info('start fetch...');
-  model.User.find(function(err, users) {
-    if (err) {
-      console.error(err.message);
+  model.User.find(function(error, users) {
+    if (error) {
+      console.error(error.message);
       return;
     }
     if (users.length == 0) {
@@ -135,8 +135,8 @@ function fetch() {
 
 // api get wrapper for getting user's latest tweets
 function fetchTweets(user, callback) {
-  api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(err, tweets) {
-    if (err) { 
+  api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(error, tweets) {
+    if (error) { 
       callback();
       return;
     }
@@ -147,9 +147,9 @@ function fetchTweets(user, callback) {
     }
 
     log.info('fetched ' + tweets.length + ' tweets.');
-    model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(err) {
-      if (err) { 
-        log.error(err);
+    model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(error) {
+      if (error) { 
+        log.error(error);
       }
     });
 
@@ -183,10 +183,10 @@ function saveTweet(tweet, cb) {
     var img = tweet.user.profile_image_url;
   }
 
-  model.Tweet.find({tid: tweet.id}, function(err, old) {
+  model.Tweet.find({tid: tweet.id}, function(error, old) {
 
-    if (err || old.length == 0) {
-      api.getImage(tweet, function(err, image_name) {
+    if (error || old.length == 0) {
+      api.getImage(tweet, function(error, image_name) {
 
         var time;
         try {
@@ -211,9 +211,9 @@ function saveTweet(tweet, cb) {
           comments_count: tweet.comments_count,
           reposts_count: tweet.reposts_count,
           attributed_uid: attributed
-        }, function(err, newtweet) {
-          if (err) {
-            log.error(err);
+        }, function(error, newtweet) {
+          if (error) {
+            log.error(error);
           }
           cb();
         });
@@ -238,9 +238,9 @@ function deleteOld() {
   model.Tweet.find({status: 0})
   .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
   .select('tid image_name')
-  .exec(function(err, tweets) {
-    if (err) {
-      log.error(err);
+  .exec(function(error, tweets) {
+    if (error) {
+      log.error(error);
       setTimeout(deleteOld, 2*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
@@ -262,18 +262,18 @@ function deleteOld() {
 }
 
 function fetchUser(option, cb) {
-  model.User.find(option, function(err, user) {
-    if (err) {
-      log.error(err);
+  model.User.find(option, function(error, user) {
+    if (error) {
+      log.error(error);
       cb();
       return;
     }
     if (!user.length) { 
       option.screen_name = option.name;
       delete option.name;
-      api.getUserInfo(option, function(err, user) {
-        if (err || (user && user.error)) {
-          var error = err || user.error;
+      api.getUserInfo(option, function(error, user) {
+        if (error || (user && user.error)) {
+          var error = error || user.error;
           log.error(error);
         } else {
           if (user.followers_count > FOLLOWER_THRESHOLD) {
@@ -292,7 +292,7 @@ function fetchUser(option, cb) {
               tweets_cnt: user.statuses_count,
               created_date: (new Date()).valueOf()
             });
-            newuser.save(function (err, user) { if(err) log.error(err);});
+            newuser.save(function (error, user) { if(error) log.error(error);});
             }
         }
         cb();

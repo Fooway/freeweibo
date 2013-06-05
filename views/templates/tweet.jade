@@ -3,7 +3,7 @@ li
     img.pull-left(src=tweet.user_img)
     .media-body
       h5.media-heading 
-        a(href='//weibo.com/u/' + tweet.user_id)= tweet.user_name
+        a(href='//weibo.com/u/' + tweet.user_id, target='_blank')= tweet.user_name
       p.text 
         span !{tweet.text}
         - if (tweet.pic_name != '') {
@@ -13,7 +13,7 @@ li
         - }
       p.tail 
         - if (tweet.pic_name != '') {
-          a(href='/images/tweets/' + tweet.pic_name + '_large.jpg') 查看大图
+          a(href='/images/tweets/' + tweet.pic_name + '_large.jpg', target='_blank') 查看大图
         - }
         span.time #{tweet.date} 
         转发(#{tweet.reposts_count}) 评论(#{tweet.comments_count})
