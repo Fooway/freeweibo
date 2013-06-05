@@ -85,7 +85,7 @@ module.exports = {
     });
   },
 
-  // GET: subscribe email to tweets [/subscribe]:
+  // POST: subscribe email to tweets [/subscribe]:
   subscribe: function(req, res) {
     var email = req.param('email');
     model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error,mail) {

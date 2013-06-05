@@ -1,6 +1,6 @@
 window.freeWeibo = window.freeWeibo || {};
 
-window.freeWeibo.Tweets = (function() {
+window.freeWeibo.Fetcher= (function() {
   // spinner option
   var spinOpts = {
     lines: 13, // The number of lines to draw
@@ -22,7 +22,7 @@ window.freeWeibo.Tweets = (function() {
   };
 
   function Fetcher(container) {
-    this.container = container;
+    this.container = $(container);
     this.init();
   }
 
@@ -34,7 +34,7 @@ window.freeWeibo.Tweets = (function() {
     this.allLoaded = false;
 
     this.spinner = null;
-    this.target = $('<div id="spin"></div>').insertBefore($(this.container))[0];
+    this.target = $('<div id="spin"></div>').insertBefore(this.container)[0];
 
     this.registerEvent();
   }
@@ -44,22 +44,22 @@ window.freeWeibo.Tweets = (function() {
 
     $(window).scroll(
       deBounce(function() {
-        var containBottom = $(self.container).offset().top + 
-                            $(self.container).height() - $(window).height();
+        var containBottom = self.container.offset().top + 
+                            self.container.height() - $(window).height();
 
         if($(window).scrollTop() >= containBottom) {
-          spinOpts.top = $(self.container).height() + 70;
+          spinOpts.top = self.container.height() + 70;
           self.getTweets();
         }
       })
     );
 
-    $(self.container).on('click', '.thumb_img', function() {
+    self.container.on('click', '.thumb_img', function() {
       $(this).hide();
       $(this).next().show();
     });
 
-    $(self.container).on('click', '.middle_img', function() {
+    self.container.on('click', '.middle_img', function() {
       $(this).hide();
       $(this).prev().show();
     });
@@ -77,18 +77,18 @@ window.freeWeibo.Tweets = (function() {
 
     $.get('/tweets', {offset: self.offset, limit: self.limit}, function(data) {
       if (data.error) {
-        $(self.container).append('<p class="alert">' + data.error + '</p>');
+        self.container.append('<p class="alert">' + data.error + '</p>');
       } else  {
-        if (!data.count) {
-          $(self.container).append('<p class="alert">所有记录已加载</p>');
+        if (data.count == 0) {
+          self.container.append('<p class="alert">所有记录已加载</p>');
           self.allLoaded = true;
+        } else {
+          self.offset += data.count;
+          self.container.append(data.tweets);
         }
-
-        self.offset += data.count;
-        $(self.container).append(data.tweets);
       }
     }).fail(function() {
-      $(self.container).append('<p class="alert">加载失败</p>');
+      self.container.append('<p class="alert">加载失败</p>');
     }).always(function() { 
       self.spinner.stop(); 
       self.isPending = false;
@@ -113,34 +113,51 @@ window.freeWeibo.Tweets = (function() {
 })();
 
 
-// email subscribe function
-window.freeWeibo.Subscriber = function(btn) {
-  var $mail = $(btn).prev();
-  var $alert = $(btn).parent('.input-append').next();
+// email subscriber
+window.freeWeibo.Subscriber = (function() {
+  function Subscriber(button) {
+    this.button = $(button);
+    this.init();
 
-  $(btn).on('click', function () {
-    var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
-    var address = $mail.val().replace(/^\s+|\s+$/g,'');
+  }
 
-    if (pattern.test(address)) {
-      $.get('/subscribe', { email: address }, function(res) {
-        if (res.err) {
-          $alert.text('订阅失败！').css('color', 'red').show();
-        } else {
-          $alert.text('订阅成功！').css('color', 'green').show();
-        }
+  Subscriber.prototype.init = function() {
+    this.mail = this.button.prev();
+    this.alert = this.button.parent('.input-append').next();
+    this.registerEvent();
 
-        $mail.val('');
-        setTimeout(function() {
-          $alert.fadeOut(2000);
-        }, 1000);
+  }
 
-      });
-    } else {
-      $alert.text('无效的地址!').css('color', 'red').show();
-      $mail.val('');
-      setTimeout(function() { $alert.fadeOut(2000); }, 1000);
-    }
-  });
-};
+  Subscriber.prototype.registerEvent = function() {
+    var self = this;
+
+    self.button.on('click', function() {
+      var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
+      var address = self.mail.val().replace(/^\s+|\s+$/g,'');
+
+      if (pattern.test(address)) {
+        $.post('/subscribe', { email: address }, function(res) {
+          if (res.error) {
+            self.alert.text('订阅失败！').css('color', 'red').show();
+          } else {
+            self.alert.text('订阅成功！').css('color', 'green').show();
+          }
+
+          self.mail.val('');
+          setTimeout(function() {
+            self.alert.fadeOut(2000);
+          }, 1000);
+
+        });
+      } else {
+        self.alert.text('无效的地址!').css('color', 'red').show();
+        self.mail.val('');
+        setTimeout(function() { self.alert.fadeOut(2000); }, 1000);
+      }
+    });
+  }
+
+  return Subscriber;
+
+})();
 
