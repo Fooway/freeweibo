@@ -244,7 +244,7 @@ function deleteOld() {
       setTimeout(deleteOld, 2*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
-        model.Tweet.remove({tid: tweet.tid});
+        model.Tweet.remove({tid: tweet.tid}, function(){});
         var files = api.imagePath(tweet.image_name);
 
         log.info('deleting tweet: ' + tweet.tid);
@@ -254,7 +254,7 @@ function deleteOld() {
           fs.unlink(files[i]);
         };
         cb();
-      }, function() { setTimeout(deleteOld, 2*60*60*1000);});
+      }, function() { setTimeout(deleteOld, 4*60*60*1000);});
     }
     
   });

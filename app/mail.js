@@ -145,7 +145,7 @@ module.exports = function(model, config) {
        }
        for (var i = 0; i < users.length; i++) {
          log.info('removing user [' + user[i].name + ']');
-         model.User.remove({uid: user[i].uid});
+         model.User.remove({uid: user[i].uid}, function() {});
        };
      });
   }
