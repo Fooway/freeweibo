@@ -21,14 +21,15 @@ window.freeWeibo.Fetcher= (function() {
     left: 'auto' // Left position relative to parent in px
   };
 
-  function Fetcher(container) {
+  function Fetcher(container, offset, limit) {
     this.container = $(container);
+    this.offset = offset || 0;
+    this.limit = limit || 30;
+
     this.init();
   }
 
   Fetcher.prototype.init = function() {
-    this.offset = 0;
-    this.limit = 30;
 
     this.isPending = false;
     this.allLoaded = false;
@@ -72,6 +73,7 @@ window.freeWeibo.Fetcher= (function() {
       return;
     }
 
+    self.container.children('.alert').remove();
     self.isPending = true;
     self.spinner = new Spinner(spinOpts).spin(self.target);
 

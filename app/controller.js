@@ -59,7 +59,9 @@ module.exports = {
             res.render('index', { 
               title: "FreeWeibo",
               tweets: tweets,
-              users: users
+              users: users,
+              initOffset: tweets.length,
+              initLimit: confLimit
             });
           }
         });
