@@ -15,7 +15,7 @@ var FETCH_INTERVAL_BY_MINUTE = 20;
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
 var CHECK_SELECT_TWEETS_DATE = 4;
-var FOLLOWER_THRESHOLD = 400000;
+var FOLLOWER_THRESHOLD = 200000;
 
 function timeConfig(option) {
   var tmp;
@@ -235,14 +235,13 @@ function deleteOld() {
   .remove(function() {});
 
   // then, remove all old tweets with image
-  model.Tweet.find({status: 0})
+  model.Tweet.find({status: 0}, {pic_name: {'$ne': ''}})
   .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
-  .where('pic_name').equals('')
   .select('tid image_name')
   .exec(function(error, tweets) {
     if (error) {
       log.error(error);
-      setTimeout(deleteOld, 2*60*60*1000);
+      setTimeout(deleteOld, 4*60*60*1000);
     } else {
       async.each(tweets, function(tweet, cb) {
         model.Tweet.remove({tid: tweet.tid}, function(){});
@@ -255,7 +254,7 @@ function deleteOld() {
           fs.unlink(files[i]);
         };
         cb();
-      }, function() { setTimeout(deleteOld, 4*60*60*1000);});
+      }, function() { setTimeout(deleteOld, 8*60*60*1000);});
     }
     
   });
