@@ -118,17 +118,25 @@ module.exports = function(model, config) {
   }
 
   function sendErrorLog() {
+    log.info('send error logs...');
     var date = new Date();
-    var errors = '';
+    var errors =  '------------------ERRORS------------------------\n';
     var logfile = path.normalize(__dirname + '/../logs/') + 'run.log';
     var child_grep = spawn('grep', ['ERROR', logfile]);
-    child_grep.on('data', function(data) {
+    child_grep.stdout.on('data', function(data) {
       errors += data;
     });
     child_grep.on('close', function() {
-      mail({address: 'tristones.liu@gmail.com', 
-            subject: 'freeWeibo ErrorLog >> ' + date.toLocaleString('en-US'),
-            text: errors
+      var child_tail = spawn('tail', ['-20', logfile]);
+      errors += '\n\n------------------RECENT LOGS------------------------\n';
+      child_tail.stdout.on('data', function(data) {
+        errors += data;
+      });
+      child_tail.on('close', function() {
+        mail({address: 'tristones.liu@gmail.com', 
+             sub: 'freeWeibo ERROR & LOG:' + date.toLocaleString('en-US'),
+             text: errors
+        });
       });
     });
   }
