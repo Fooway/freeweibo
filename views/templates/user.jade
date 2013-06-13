@@ -3,7 +3,7 @@ li
     img.pull-left(src=user.img_url)
     .media-body
       h5.media-heading
-        a(href='//weibo.com/u/' + user.uid)= user.name
+        a(href='//weibo.com/u/' + user.uid, target='_blank')= user.name
       p.tail
         粉丝(#{user.followers_cnt})
         br

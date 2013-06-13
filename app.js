@@ -59,8 +59,9 @@ if ('development' == app.get('env')) {
 app.get('/about', controller.about);
 app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
-app.get('/subscribe', controller.subscribe);
 app.get('/', controller.index);
+
+app.post('/subscribe', controller.subscribe);
 
 http.createServer(app).listen(app.get('port'), function(){
   log.info('Express server listening on port ' + app.get('port'));

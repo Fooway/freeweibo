@@ -47,9 +47,9 @@ module.exports = function(model, config) {
       subject: option.sub,
       text: option.text || '',
       html: option.html || ''
-    }, function(err, response){
-      if (err) {
-        log.error(err);
+    }, function(error, response){
+      if (error) {
+        log.error(error);
       } else {
         log.info('message sended for ' + option.address);
       }
@@ -66,20 +66,20 @@ module.exports = function(model, config) {
     model.Tweet.find({status: 1, sended: false })
       .limit(10)
       .sort('-delete_time')
-      .exec(function(err, tweets) {
-        if (err || tweets.length == 0) {
-          log.error(err?err:'no tweets to send');
+      .exec(function(error, tweets) {
+        if (error || tweets.length == 0) {
+          log.error(error?error:'no tweets to send');
           return;
         }
 
         if (tweets.length <= 5) {
-          log.error(err?err:'tweets too less to send');
+          log.error(error?error:'tweets too less to send');
           return;
         }
 
-        model.Mail.find(function (err, mails) {
-          if (err || mails.length == 0) {
-            log.error(err?err:'no subscribers to send');
+        model.Mail.find(function (error, mails) {
+          if (error || mails.length == 0) {
+            log.error(error?error:'no subscribers to send');
             return;
           }
 
@@ -139,13 +139,13 @@ module.exports = function(model, config) {
     model.User.find({delete_attributed:0})
      .where('created_date').lt(dateValue - interval)
      .select('name uid')
-     .exec(function(err, users) {
-       if (err) {
+     .exec(function(error, users) {
+       if (error) {
          return;
        }
        for (var i = 0; i < users.length; i++) {
          log.info('removing user [' + user[i].name + ']');
-         model.User.remove({uid: user[i].uid});
+         model.User.remove({uid: user[i].uid}, function() {});
        };
      });
   }

@@ -7,7 +7,7 @@ var config = module.exports = {
     check_select_tweets_days: 4,
     follower_threshold: 400000,
     salt: 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq',
-    page_num: 30
+    limit: 30
   },
 
   tweeters: [
