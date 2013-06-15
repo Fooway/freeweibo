@@ -235,7 +235,8 @@ function deleteOld() {
   .remove(function() {});
 
   // then, remove all old tweets with image
-  model.Tweet.find({status: 0}, {pic_name: {'$ne': ''}})
+  model.Tweet.find({status: 0})
+  .where('pic_name').ne('')
   .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
   .select('tid image_name')
   .exec(function(error, tweets) {
