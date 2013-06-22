@@ -10,11 +10,11 @@ var async = require('async');
 var model = {};
 var log;
 var tweeters = [];
-var DELETE_INTERVAL_BY_DATE = 5;
+var DELETE_INTERVAL_BY_DATE = 15;
 var FETCH_INTERVAL_BY_MINUTE = 20; 
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
-var CHECK_SELECT_TWEETS_DATE = 4;
+var CHECK_SELECT_TWEETS_DATE = 7;
 var FOLLOWER_THRESHOLD = 200000;
 
 function timeConfig(option) {

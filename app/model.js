@@ -39,7 +39,7 @@ module.exports = function(url) {
     user_img: String,
     user_name: String,
     origin_pic_url: String,
-    pic_name: String,
+    pic_name: {type: String, default: ''},
     comments_count: Number,
     reposts_count: Number,
     attributed_uid: Number

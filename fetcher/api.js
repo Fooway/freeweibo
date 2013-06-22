@@ -195,11 +195,19 @@ module.exports = function() {
 // request api function
 function get(url, callback) {
   https.get('https://' + api.host + url, function(res) {
-    var buffers = [];
-    res.on('data', function(chunk) { buffers.push(chunk); });
+    var chunks = [];
+    res.on('data', function(chunk) { chunks.push(chunk); });
     res.on('end', function() {
-      var buffer = Buffer.concat(buffers);
-      data = JSON.parse(buffer.toString());
+      var buffer = Buffer.concat(chunks);
+      try {
+        data = JSON.parse(buffer.toString());
+      } catch (e) {
+        chunks = [];
+        buffer = [];
+        log.error(e.stack);
+        callback(e, null);
+        return;
+      }
       // debug point
       if (data.error) {
         callback(data.error);
