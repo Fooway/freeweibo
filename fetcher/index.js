@@ -10,11 +10,11 @@ var async = require('async');
 var model = {};
 var log;
 var tweeters = [];
-var DELETE_INTERVAL_BY_DATE = 15;
+var DELETE_INTERVAL_BY_DATE = 20;
 var FETCH_INTERVAL_BY_MINUTE = 20; 
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
-var CHECK_SELECT_TWEETS_DATE = 7;
+var CHECK_SELECT_TWEETS_DATE = 10;
 var FOLLOWER_THRESHOLD = 200000;
 
 function timeConfig(option) {
@@ -46,11 +46,11 @@ var fetcher = module.exports = function (db, config) {
 function check() {
   log.info('start check... ');
   var now = (new Date()).valueOf();
-  model.Tweet.find({status: 0})
-    .where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
-    .sort('-create_at')
-    .select('tid attributed_uid user_id')
-    .exec(function(error, tweets) {
+  model.Tweet.find({status: 0}).
+    //.where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000)
+    sort('-create_at').
+    select('tid attributed_uid user_id').
+    exec(function(error, tweets) {
       function done(results) {
         setTimeout(check, CHECK_INTERVAL_BY_MINUTE * 60 * 1000);
         setTimeout(deleteOld, 60 * 60 * 1000);
@@ -229,17 +229,17 @@ function deleteOld() {
   var now = (new Date()).valueOf();
 
   // first, remove all old tweets with no image
-  model.Tweet.find({status: 0})
-  .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
-  .where('pic_name').equals('')
-  .remove(function() {});
+  model.Tweet.find({status: 0}).
+   where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000).
+   where('pic_name').equals('').
+   remove(function() {});
 
   // then, remove all old tweets with image
-  model.Tweet.find({status: 0})
-  .where('pic_name').ne('')
-  .where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000)
-  .select('tid image_name')
-  .exec(function(error, tweets) {
+  model.Tweet.find({status: 0}).
+   where('pic_name').ne('').
+   where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000).
+   select('tid image_name').
+   exec(function(error, tweets) {
     if (error) {
       log.error(error);
       setTimeout(deleteOld, 4*60*60*1000);
