@@ -2,6 +2,10 @@
 /**
  * Module dependencies.
  */
+require('nodetime').profile({
+    accountKey: 'e0743a29f5b1481512378dfafddf1212a40cef29', 
+    appName: 'filterback'
+  });
 
 var express = require('express');
 var http = require('http');
