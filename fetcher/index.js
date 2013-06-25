@@ -38,6 +38,8 @@ var fetcher = module.exports = function (db, config) {
   }
 
   fetch();
+  check();
+  deleteOld();
 };
 
 
@@ -53,7 +55,6 @@ function check() {
     exec(function(error, tweets) {
       function done(results) {
         setTimeout(check, CHECK_INTERVAL_BY_MINUTE * 60 * 1000);
-        setTimeout(deleteOld, 60 * 60 * 1000);
       }
 
       function update_status (error, response, tweet) {
@@ -128,7 +129,6 @@ function fetch() {
       }, API_REQUEST_INTERVAL_BY_SEC * 1000);
     }, function(results) {
       setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
-      setTimeout(check,  5 * 1000);
     });
   });
 }
