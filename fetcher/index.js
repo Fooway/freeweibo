@@ -39,7 +39,7 @@ var fetcher = module.exports = function (db, config) {
 
   fetch();
   check();
-  deleteOld();
+  //deleteOld();
 };
 
 
