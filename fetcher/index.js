@@ -11,7 +11,7 @@ var model = {};
 var log;
 var tweeters = [];
 var DELETE_INTERVAL_BY_DATE = 20;
-var FETCH_INTERVAL_BY_MINUTE = 20; 
+var FETCH_INTERVAL_BY_MINUTE = 1; 
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
 var CHECK_SELECT_TWEETS_DATE = 10;
@@ -39,7 +39,7 @@ var fetcher = module.exports = function (db, config) {
 
   fetch();
   check();
-  //deleteOld();
+  deleteOld();
 };
 
 
@@ -157,6 +157,7 @@ function fetchTweets(user, callback) {
       saveTweet(tweet, cb);
     }, function(results){
       callback();
+      tweets = {};
     });
   });
 }
