@@ -215,6 +215,7 @@ function get(url, callback) {
         callback(null, data);
       }
       buffer = [];
+      chunks = [];
     })
   }).on('error', function(e) {
     callback(e, null);

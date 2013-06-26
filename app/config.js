@@ -1,11 +1,11 @@
 var config = module.exports = {
   option: {
-    fetch_interval_mins: 20,
+    fetch_interval_mins: 1,
     check_interval_mins: 62,
-    delete_interval_days: 20,
+    delete_interval_days: 15,
     api_request_interval_secs: 5,
-    check_select_tweets_days: 10,
-    follower_threshold: 200000,
+    check_select_tweets_days: 7,
+    follower_threshold: 100000,
     salt: 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq',
     limit: 30
   },
