@@ -13,7 +13,7 @@ echo "* Deploying $ENVIRONMENT/$REF"
 ssh $USER@$SERVER "cd $DEPLOY_PATH && \
                    git reset --hard && \
                    git checkout $REF && \
-                   git pull && \
+                   git pull origin master&& \
                    npm install && 
                    stylus  public/stylesheets/ &&\
                    /etc/init.d/filterback restart"
