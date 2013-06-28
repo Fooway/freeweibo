@@ -37,9 +37,9 @@ var fetcher = module.exports = function (db, config) {
     api.setLog(log);
   }
 
-  //fetch();
-  //check();
-  //deleteOld();
+  fetch();
+  check();
+  deleteOld();
 
   return {
     addUser: fetchUser
