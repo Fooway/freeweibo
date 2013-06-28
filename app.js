@@ -2,10 +2,6 @@
 /**
  * Module dependencies.
  */
-require('nodetime').profile({
-    accountKey: 'e0743a29f5b1481512378dfafddf1212a40cef29', 
-    appName: 'filterback'
-  });
 
 var express = require('express');
 var http = require('http');
@@ -35,7 +31,9 @@ process.on('exit', function () {
 });
 
 // first, boot fetcher
-fetcher(controller.db, config);
+var service = fetcher(controller.db, config);
+
+controller.initService(service);
 // then, mailer
 var sendmail = mail(controller.db, config);
 
@@ -63,9 +61,12 @@ if ('development' == app.get('env')) {
 app.get('/about', controller.about);
 app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
+app.get('/admin', controller.admin);
 app.get('/', controller.index);
 
-app.post('/subscribe', controller.subscribe);
+app.post('/email', controller.email);
+app.post('/add-user', controller.adminUsers);
+app.post('/delete-user', controller.adminUsers);
 
 http.createServer(app).listen(app.get('port'), function(){
   log.info('Express server listening on port ' + app.get('port'));

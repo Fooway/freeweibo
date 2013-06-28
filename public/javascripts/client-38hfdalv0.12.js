@@ -117,14 +117,17 @@ window.freeWeibo.Fetcher= (function() {
 
 // email subscriber
 window.freeWeibo.Subscriber = (function() {
-  function Subscriber(button) {
-    this.button = $(button);
+  function Subscriber(option, callback) {
+    this.button = $('.subscriber');
+    this.pattern = option.pattern;
+    this.location = option.location;
+    this.callback = callback;
     this.init();
 
   }
 
   Subscriber.prototype.init = function() {
-    this.mail = this.button.prev();
+    this.input = this.button.prev();
     this.alert = this.button.parent('.input-append').next();
     this.registerEvent();
 
@@ -134,27 +137,31 @@ window.freeWeibo.Subscriber = (function() {
     var self = this;
 
     self.button.on('click', function() {
-      var pattern = /^[\w].[-.\w]*@[-\w]+\.[-\w]+/;
-      var address = self.mail.val().replace(/^\s+|\s+$/g,'');
+      var pattern = self.pattern;
+      var input = self.input.val().replace(/^\s+|\s+$/g,'');
 
-      if (pattern.test(address)) {
-        $.post('/subscribe', { email: address }, function(res) {
+      if (pattern && !pattern.test(input)) {
+        self.alert.text('无效的输入!').css('color', 'red').show();
+        self.input.val('');
+        setTimeout(function() { self.alert.fadeOut(2000); }, 1000);
+      } else {
+        $.post(self.location, { data: input}, function(res) {
           if (res.error) {
-            self.alert.text('订阅失败！').css('color', 'red').show();
+            self.alert.text('提交失败！').css('color', 'red').show();
           } else {
-            self.alert.text('订阅成功！').css('color', 'green').show();
+            self.alert.text('提交成功！').css('color', 'green').show();
+
+            if (self.callback) {
+              self.callback(res.data);
+            }
           }
 
-          self.mail.val('');
+          self.input.val('');
           setTimeout(function() {
             self.alert.fadeOut(2000);
           }, 1000);
 
         });
-      } else {
-        self.alert.text('无效的地址!').css('color', 'red').show();
-        self.mail.val('');
-        setTimeout(function() { self.alert.fadeOut(2000); }, 1000);
       }
     });
   }
@@ -162,4 +169,13 @@ window.freeWeibo.Subscriber = (function() {
   return Subscriber;
 
 })();
+
+$(function() {
+  $('.users').on('click', '.rm-user', function() {
+    var userid = parseInt($(this).prev().attr('href').replace('//weibo.com/u/', ''));
+
+    $(this).parents('li').remove();
+    $.post('/delete-user', { data: userid}, function() {});
+});
+});
 

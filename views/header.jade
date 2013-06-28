@@ -3,12 +3,12 @@
     img(src='/images/logo.png')
   .input-append
     input.input-medium(type='text', id='mail', placeholder='电子邮箱')
-    button.btn(id='subscribe') 订阅
+    button.btn.subscriber 订阅
 
-  span#alert
+  span.alerter
   script
     $(function() {
-      new freeWeibo.Subscriber('#subscribe');
+      new freeWeibo.Subscriber({pattern: /^[\w].[-.\w]*@[-\w]+\.[-\w]+/, location: '/email'});
       })
   a(href='/about') 关于
   .clear

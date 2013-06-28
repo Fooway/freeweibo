@@ -6,8 +6,11 @@ var crypto = require('crypto');
 var jade = require('jade');
 var User = model.User;
 var Tweet = model.Tweet;
+var service = {};
 
 var template = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'),
+      {encoding: 'utf-8'}));
+var userTemplate = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'),
       {encoding: 'utf-8'}));
 
 var salt = config.option.salt;
@@ -43,6 +46,7 @@ function  convert(tweets) {
 module.exports = {
 
   db: model,
+  initService: function (param) { service = param;},
 
   // GET: [/]
   index: function(req, res) {
@@ -88,8 +92,8 @@ module.exports = {
   },
 
   // POST: subscribe email to tweets [/subscribe]:
-  subscribe: function(req, res) {
-    var email = req.param('email');
+  email: function(req, res) {
+    var email = req.param('data');
     model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error,mail) {
       res.json({error: !!error});
     });
@@ -115,5 +119,41 @@ module.exports = {
   },
 
   // GET: [/about]
-  about: function(req, res) { res.render('about', {title: 'About | freeWeibo'});} 
+  about: function(req, res) { res.render('about', {title: 'About | freeWeibo'});},
+
+  admin: function(req, res) {
+
+    User.find(function(error, users) {
+      if (error) {
+        console.error(error.message);
+        res.redirect('404');
+      } else {
+        res.render('admin', { 
+          title: "FreeWeibo",
+          users: users
+        });
+      }
+    });
+  },
+
+  // POST: [/add-user, /delete-user]
+  adminUsers: function(req, res) {
+    if (req.path === '/add-user') {
+      var userName = req.param('data');
+      console.log(userName);
+      service.addUser({name: userName}, function(error, user) {
+        if (error) {
+          res.json({error: error});
+        } else {
+          res.json({data: userTemplate({user:user})});
+        }
+      });
+
+    } else {
+      var userId = req.param('data');
+      console.log('remove user ' + userId);
+      User.remove({uid: userId}, function() {});
+      res.json({});
+    }
+  }
 };

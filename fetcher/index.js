@@ -37,9 +37,13 @@ var fetcher = module.exports = function (db, config) {
     api.setLog(log);
   }
 
-  fetch();
-  check();
-  deleteOld();
+  //fetch();
+  //check();
+  //deleteOld();
+
+  return {
+    addUser: fetchUser
+  };
 };
 
 
@@ -267,7 +271,7 @@ function fetchUser(option, cb) {
   model.User.find(option, function(error, user) {
     if (error) {
       log.error(error);
-      cb();
+      cb(error);
       return;
     }
     if (!user.length) { 
@@ -277,27 +281,32 @@ function fetchUser(option, cb) {
         if (error || (user && user.error)) {
           var error = error || user.error;
           log.error(error);
+          cb(error);
         } else {
-          if (user.followers_count > FOLLOWER_THRESHOLD) {
-            log.info('add ' + user.screen_name + ', has ' +
-                  user.followers_count + ' followers.');
-            var newuser = new model.User({
-              name: user.screen_name, 
-              uid: user.id,
-              img_url: user.profile_image_url,
-              latest_tid: 0,
-              location: user.location,
-              description: user.description,
-              gender: user.gender,
-              followers_cnt: user.followers_count,
-              friends_cnt: user.friends_count,
-              tweets_cnt: user.statuses_count,
-              created_date: (new Date()).valueOf()
-            });
-            newuser.save(function (error, user) { if(error) log.error(error);});
+          log.info('add ' + user.screen_name + ', has ' +
+                   user.followers_count + ' followers.');
+          var newuser = new model.User({
+            name: user.screen_name, 
+            uid: user.id,
+            img_url: user.profile_image_url,
+            latest_tid: 0,
+            location: user.location,
+            description: user.description,
+            gender: user.gender,
+            followers_cnt: user.followers_count,
+            friends_cnt: user.friends_count,
+            tweets_cnt: user.statuses_count,
+            created_date: (new Date()).valueOf()
+          });
+          newuser.save(function (error, user) { 
+            if(error) { 
+              log.error(error);
+              cb(error);
+            } else {
+              cb(null, user);
             }
+          });
         }
-        cb();
       });
     }
   });

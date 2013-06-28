@@ -2,6 +2,13 @@
   margin: 0;
   padding: 0;
 }
+ul {
+  list-style: none;
+}
+ul.users li {
+  display: inline-block;
+  width: 200px;
+}
 body {
   padding: 50px 0;
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -9,7 +16,9 @@ body {
 body .container {
   min-width: 200px;
   max-width: 940px;
-  width: 90%;
+}
+body .container width: 90% .rm-user {
+  margin-left: 10px;
 }
 body .media .pull-left {
   margin-top: 5px;
@@ -49,13 +58,14 @@ body .header .input-append {
   margin-top: 25px;
   float: right;
 }
-body .header #alert {
+body .header .alerter {
   margin-top: 30px;
   margin-right: 10px;
   float: right;
 }
 body .tweets {
   margin: 0;
+  list-style: none;
 }
 body .tweets p.alert {
   text-align: center;
@@ -94,7 +104,7 @@ body .row-fluid .span3 {
   }
 }
 @media only screen and (max-width: 350px) {
-  body .container .header #alert {
+  body .container .header .alerter {
     margin-top: 0;
     margin-right: 70px;
   }

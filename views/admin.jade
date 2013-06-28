@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  .container
+    .header
+      a.logo(href='/')
+        img(src='/images/logo.png')
+      .input-append
+        input.input-medium(type='text', placeholder='用户昵称')
+        button.btn.subscriber 加入
+
+      span.alerter
+      script
+        $(function() {
+          new freeWeibo.Subscriber({location: '/add-user'}, function(data) { $('.users').prepend(data); });
+        })
+    .row-fluid 
+      .span12
+        ul.users
+          each user in users
+            include templates/user

@@ -1,6 +1,6 @@
 // create user and tweet model
 var mongoose = require('mongoose');
-mongoose.set('debug', false);
+mongoose.set('debug', true);
 
 
 module.exports = function(url) {
