@@ -170,6 +170,23 @@ window.freeWeibo.Subscriber = (function() {
 
 })();
 
+window.freeWeibo.login = function () {
+  $('form .btn').on('click', function(e) {
+    e.preventDefault();
+    var name = $('form #username').val();
+    var password = $('form #password').val();
+    console.log('start send login...');
+    $.post('/author', {username: name, password: password}, function(res) {
+      if (res.status) {
+        document.location.href = '/admin';
+        console.log('login success');
+      } else {
+        alert('authorize fail!');
+      }
+    });
+  });
+}
+
 $(function() {
   $('.users').on('click', '.rm-user', function() {
     var userid = parseInt($(this).prev().attr('href').replace('//weibo.com/u/', ''));

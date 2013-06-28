@@ -4,7 +4,7 @@ block content
   .container
     include header
     .row-fluid 
-      .span8
+      .span12
         ul.tweets
           each tweet in tweets
             include templates/tweet
@@ -12,4 +12,3 @@ block content
           $(function() {
             new freeWeibo.Fetcher('.tweets', #{initOffset}, #{initLimit});
             })
-      .span3

@@ -8,6 +8,7 @@ var User = model.User;
 var Tweet = model.Tweet;
 var service = {};
 
+
 var template = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'),
       {encoding: 'utf-8'}));
 var userTemplate = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'),
@@ -121,19 +122,39 @@ module.exports = {
   // GET: [/about]
   about: function(req, res) { res.render('about', {title: 'About | freeWeibo'});},
 
+  login: function (req, res) {
+    res.render('login', {title: "Admin-Login | FreeWeibo"});
+  },
+
+  author: function(req, res) {
+    var username = req.param('username');
+    var password = req.param('password');
+
+    if (username === config.option.username && password === config.option.password) {
+      res.cookie('authorized', '1', { maxAge: 14*24*60*60*1000, signed: true });
+      res.json({status: true});
+    } else {
+      res.json({status: false});
+    }
+  },
+
   admin: function(req, res) {
 
-    User.find(function(error, users) {
-      if (error) {
-        console.error(error.message);
-        res.redirect('404');
-      } else {
-        res.render('admin', { 
-          title: "FreeWeibo",
-          users: users
-        });
-      }
-    });
+    if (req.signedCookies.authorized) {
+      User.find(function(error, users) {
+        if (error) {
+          console.error(error.message);
+          res.redirect('404');
+        } else {
+          res.render('admin', { 
+            title: "Admin | FreeWeibo",
+            users: users
+          });
+        }
+      });
+    } else {
+      res.redirect('/login');
+    }
   },
 
   // POST: [/add-user, /delete-user]

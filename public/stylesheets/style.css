@@ -16,8 +16,9 @@ body {
 body .container {
   min-width: 200px;
   max-width: 940px;
+  width: 90%;
 }
-body .container width: 90% .rm-user {
+body .rm-user {
   margin-left: 10px;
 }
 body .media .pull-left {
@@ -94,9 +95,13 @@ body .tweets .middle_img:hover {
 body .row-fluid .span3 {
   float: right;
 }
+body .form-horizontal .control-group {
+  width: 60%;
+  margin: 20px auto;
+}
 /* tablet and mobile phones */
 @media only screen and (max-width: 716px) {
-  .row-fluid .span8 {
+  .row-fluid .span12 {
     width: 100%;
   }
   .row-fluid .span3 {

@@ -1,5 +1,7 @@
 var config = module.exports = {
   option: {
+    username: 'admin',
+    password: 'iloveYOU123',
     fetch_interval_mins: 1,
     check_interval_mins: 62,
     delete_interval_days: 15,
