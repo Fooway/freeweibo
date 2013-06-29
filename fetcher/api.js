@@ -146,7 +146,14 @@ module.exports = function() {
     getImage: function(tweet, callback) {
       if (tweet.original_pic) {
         var regex = /\/([^\/]+)\.[\w]+$/;
-        var base_name = regex.exec(tweet.original_pic)[1];
+        var base_name ; 
+        try {
+          base_name = regex.exec(tweet.original_pic)[1];
+        } catch(e) {
+          log.error('PIC_MATCH_FAIL:' + tweet.original_pic);
+          throw e;
+        }
+
         var local_path = imagePath(base_name);
         var files = []; 
 
