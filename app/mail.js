@@ -23,15 +23,14 @@ module.exports = function(model, config) {
     start: true
   });
 
-  /*
   new cronJob({
     cronTime: '00 00 03 * * 2,6',
     onTick: function() {
       // Runs every month day 15 at 01:30:00 AM. 
       deleteUsers();
     },
-    start: false
-  }); */
+    start: true
+  }); 
 
   var mail = function(option, cb) {
     var transport = nodemailer.createTransport("SMTP", {

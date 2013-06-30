@@ -15,7 +15,6 @@ var FETCH_INTERVAL_BY_MINUTE = 1;
 var CHECK_INTERVAL_BY_MINUTE = 66;
 var API_REQUEST_INTERVAL_BY_SEC = 2;
 var CHECK_SELECT_TWEETS_DATE = 10;
-var FOLLOWER_THRESHOLD = 200000;
 
 function timeConfig(option) {
   var tmp;
@@ -24,7 +23,6 @@ function timeConfig(option) {
   (tmp = option.check_interval_mins) ? (CHECK_INTERVAL_BY_MINUTE = tmp):null;
   (tmp = option.api_request_interval_secs) ? (API_REQUEST_INTERVAL_BY_SEC = tmp):null;
   (tmp = option.check_select_tweets_days) ? (CHECK_SELECT_TWEETS_DATE= tmp):null;
-  (tmp = option.follower_threshold) ? (FOLLOWER_THRESHOLD = tmp):null;
 }
 
 var fetcher = module.exports = function (db, config) {
@@ -52,7 +50,7 @@ var fetcher = module.exports = function (db, config) {
 function check() {
   log.info('start check... ');
   var now = (new Date()).valueOf();
-  model.Tweet.find({status: 0}).//where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000).
+  model.Tweet.find({status: 0}).where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000).
     sort('-create_at').
     select('tid attributed_uid user_id').
     exec(function(error, tweets) {
