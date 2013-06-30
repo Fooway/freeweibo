@@ -47,6 +47,7 @@ function  convert(tweets) {
 module.exports = {
 
   db: model,
+
   initService: function (param) { service = param;},
 
   // GET: [/]
@@ -55,7 +56,7 @@ module.exports = {
       if (error) {
         res.redirect('404');
       } else {
-        User.find(function(error, users) {
+        User.find({}).sort('-delete_attributed').limit(10).exec(function(error, users) {
           if (error) {
             console.error(error.message);
             res.redirect('404');
@@ -65,6 +66,7 @@ module.exports = {
               title: "FreeWeibo",
               tweets: tweets,
               users: users,
+              stats: config.stats,
               initOffset: tweets.length,
               initLimit: confLimit
             });

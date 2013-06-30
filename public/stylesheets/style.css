@@ -34,7 +34,7 @@ body .media .media-body .tail .time {
   margin-right: 40px;
 }
 body .header {
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   border-bottom: 2px solid #bbb;
 }
 body .header a {
@@ -99,9 +99,12 @@ body .form-horizontal .control-group {
   width: 60%;
   margin: 20px auto;
 }
+body .stats {
+  margin-bottom: 50px;
+}
 /* tablet and mobile phones */
 @media only screen and (max-width: 716px) {
-  .row-fluid .span12 {
+  .row-fluid .span8 {
     width: 100%;
   }
   .row-fluid .span3 {

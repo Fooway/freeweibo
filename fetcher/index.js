@@ -35,8 +35,8 @@ var fetcher = module.exports = function (db, config) {
     api.setLog(log);
   }
 
-  fetch();
-  check();
+  //fetch();
+  //check();
   deleteOld();
 
   return {
@@ -283,31 +283,38 @@ function fetchUser(option, cb) {
           log.error(error);
           cb(error);
         } else {
-          log.info('add ' + user.screen_name + ', has ' +
-                   user.followers_count + ' followers.');
-          var newuser = new model.User({
-            name: user.screen_name, 
-            uid: user.id,
-            img_url: user.profile_image_url,
-            latest_tid: 0,
-            location: user.location,
-            description: user.description,
-            gender: user.gender,
-            followers_cnt: user.followers_count,
-            friends_cnt: user.friends_count,
-            tweets_cnt: user.statuses_count,
-            created_date: (new Date()).valueOf()
-          });
-          newuser.save(function (error, user) { 
-            if(error) { 
-              log.error(error);
-              cb(error);
-            } else {
-              cb(null, user);
-            }
-          });
+
+          if (user.followers_count > 1000) {
+            log.info('add ' + user.screen_name + ', has ' +
+              user.followers_count + ' followers.');
+            var newuser = new model.User({
+              name: user.screen_name, 
+                uid: user.id,
+                img_url: user.profile_image_url,
+                latest_tid: 0,
+                location: user.location,
+                description: user.description,
+                gender: user.gender,
+                followers_cnt: user.followers_count,
+                friends_cnt: user.friends_count,
+                tweets_cnt: user.statuses_count,
+                created_date: (new Date()).valueOf()
+            });
+            newuser.save(function (error, user) { 
+              if(error) { 
+                log.error(error);
+                cb(error);
+              } else {
+                cb(null, user);
+              }
+            });
+          } else {
+            cb('not enough followers!');
+          }
         }
       });
+    } else {
+      cb('user already exists!');
     }
   });
 

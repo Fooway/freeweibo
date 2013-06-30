@@ -4,7 +4,7 @@ block content
   .container
     include header
     .row-fluid 
-      .span12
+      .span8
         ul.tweets
           each tweet in tweets
             include templates/tweet
@@ -12,3 +12,26 @@ block content
           $(function() {
             new freeWeibo.Fetcher('.tweets', #{initOffset}, #{initLimit});
             })
+
+      .span3 
+        .stats
+          h3 删帖统计
+          ul
+            each stat in stats
+              li
+                a(href='/?time=' + stat.time) #{stat.chinese}(#{stat.count})
+
+        .hot-users
+          h3 用户统计
+          ul
+            each user in users
+              li
+                .media
+                  img.pull-left(src=user.img_url)
+                  .media-body
+                    h5.media-heading
+                      a(href='//weibo.com/u/' + user.uid, target='_blank')= user.name
+                    p.tail
+                      粉丝人数(#{user.followers_cnt})
+                      br
+                      相关屏蔽(#{user.delete_attributed})
