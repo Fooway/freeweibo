@@ -94,6 +94,8 @@ function check() {
           api.getTweetById(tweet.tid, function(error, data) {
             if (!error) {
               update_status(error, data, tweet); 
+            } else {
+              log.error(error);
             }
             cb();
           });

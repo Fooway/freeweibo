@@ -6,7 +6,7 @@ var config = module.exports = {
     check_interval_mins: 62,
     delete_interval_days: 15,
     api_request_interval_secs: 6,
-    check_select_tweets_days: 7,
+    check_select_tweets_days: 5,
     follower_threshold: 100000,
     salt: 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq',
     limit: 30
