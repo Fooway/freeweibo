@@ -15,32 +15,32 @@ var config = module.exports = {
     { 
       time: 'today',
       chinese: '今天',
-      count: 1
+      count: 56
     },
     { 
       time: 'yesterday',
       chinese: '昨天',
-      count: 1
+      count: 34
     },
     { 
       time: 'thisweek',
       chinese: '本周',
-      count: 1
+      count: 81
     },
     { 
       time: 'lastweek',
       chinese: '上周',
-      count: 1
+      count: 10
     },
     { 
       time: 'thismonth',
       chinese: '本月',
-      count: 1
+      count: 112
     },
     { 
       time: 'lastmonth',
       chinese: '上月',
-      count: 1
+      count: 78
     }
   ],
 

@@ -35,8 +35,8 @@ var fetcher = module.exports = function (db, config) {
     api.setLog(log);
   }
 
-  //fetch();
-  //check();
+  fetch();
+  check();
   deleteOld();
 
   return {
