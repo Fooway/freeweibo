@@ -215,12 +215,10 @@ function get(url, callback) {
         callback(e, null);
         return;
       }
+
       // debug point
-      if (data.error) {
-        callback(data.error);
-      } else {
-        callback(null, data);
-      }
+      callback(null, data);
+
       buffer = [];
       chunks = [];
     })

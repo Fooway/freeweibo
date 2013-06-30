@@ -52,7 +52,7 @@ var fetcher = module.exports = function (db, config) {
 function check() {
   log.info('start check... ');
   var now = (new Date()).valueOf();
-  model.Tweet.find({status: 0}).where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000).
+  model.Tweet.find({status: 0}).//where('create_at').gt(now - CHECK_SELECT_TWEETS_DATE * 24 * 60 * 60 * 1000).
     sort('-create_at').
     select('tid attributed_uid user_id').
     exec(function(error, tweets) {
@@ -90,7 +90,7 @@ function check() {
         // so we will not exceed the api access frequency
         // otherwise, weibo will block our access temporarily
         setTimeout(function() {
-          log.info('checking tweet [ ' + tweet.tid + ']... ');
+          log.info('checking tweet [' + tweet.tid + ']... ');
           api.getTweetById(tweet.tid, function(error, data) {
             if (!error) {
               update_status(error, data, tweet); 
