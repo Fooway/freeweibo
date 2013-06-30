@@ -140,6 +140,7 @@ function fetch() {
 function fetchTweets(user, callback) {
   api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(error, tweets) {
     if (error) { 
+      log.error(error);
       callback();
       return;
     }
