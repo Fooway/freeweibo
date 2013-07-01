@@ -13,6 +13,11 @@ var config = module.exports = {
 
   stats: [
     { 
+      time: 'all',
+      chinese: '所有',
+      count: 56
+    },
+    { 
       time: 'today',
       chinese: '今天',
       count: 56

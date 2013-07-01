@@ -15,14 +15,14 @@ block content
 
       .span3 
         .stats
-          h3 删帖统计
+          h3 按时间查看
           ul
             each stat in stats
               li
-                a(href='/?time=' + stat.time) #{stat.chinese}(#{stat.count})
+                a(href='/?time=' + stat.time, target='_self') #{stat.chinese}
 
         .hot-users
-          h3 用户统计
+          h3 按用户查看
           ul
             each user in users
               li
@@ -30,7 +30,7 @@ block content
                   img.pull-left(src=user.img_url)
                   .media-body
                     h5.media-heading
-                      a(href='//weibo.com/u/' + user.uid, target='_blank')= user.name
+                      a(href='/?userid=' + user.uid, target='_self')= user.name
                     p.tail
                       粉丝人数(#{user.followers_cnt})
                       br

@@ -20,11 +20,25 @@ var confLimit = config.option.limit;
 function getTweets(option, cb) {
   var offset = option.offset || 0;
   var limit = option.limit || confLimit;
-  Tweet.find({status: 1})
-    .limit(limit)
-    .skip(offset)
-    .sort('-delete_time')
-    .exec(function(error, tweets) {
+  var uid = option.uid;
+  var startTime = option.startTime;
+  var endTime = option.endTime;
+
+  var query = Tweet.find({status: 1});
+
+  if (uid) {
+    query.where('attributed_uid').equals(uid);
+  }
+
+  if (startTime) {
+    query.where('create_at').gt(startTime);
+  }
+
+  if (endTime) {
+    query.where('create_at').lt(endTime);
+  }
+
+  query.limit(limit).skip(offset).sort('-delete_time').exec(function(error, tweets) {
       if (error) {
         console.error(error.message);
         cb(error);
@@ -32,6 +46,9 @@ function getTweets(option, cb) {
         cb(null, tweets);
       }
     });
+}
+
+function getTweetsStats(option, cb) {
 }
 
 function  convert(tweets) {
@@ -44,6 +61,81 @@ function  convert(tweets) {
     }
   };
 }
+
+
+function calculateTimespan(time) {
+  var option = {};
+  var oneDay = 24 * 60 * 60 * 1000;
+  var oneWeek = oneDay * 7;
+
+  if (!time || time === 'all') return option;
+
+  var start = new Date(); // start time point 
+  var end = new Date();   // end time point
+
+  if (time === 'today') {
+    start.setHours(0, 0, 0, 0);
+  }
+
+  if (time === 'yesterday') {
+    start.setHours(0, 0, 0, 0);
+    start = start - oneDay;
+    end.setHours(0, 0, 0, 0);
+  }
+
+  if (time === 'thisweek') {
+    start.setHours(0, 0, 0, 0);
+    start = start - oneDay * start.getDay();
+  }
+
+  if (time === 'lastweek') {
+    start.setHours(0, 0, 0, 0);
+    start = start - oneDay * (start.getDay() + 7);
+
+    end.setHours(0, 0, 0, 0);
+    end = end - oneDay * end.getDay();
+  }
+
+  if (time === 'thismonth') {
+    start.setHours(0, 0, 0, 0);
+    start = start - oneDay * start.getDate();
+  }
+
+  if (time === 'lastmoth') {
+    start.setHours(0, 0, 0, 0);
+    start = start - oneDay * (start.getDate() + getMonthDays(start - 1000));
+
+    end.setHours(0, 0, 0, 0);
+    end = end - oneDay * end.getDate();
+  }
+
+  option.startTime = start.valueOf();
+  option.endTime = end.valueOf();
+
+  return option;
+}
+
+function getMonthDays(time) {
+  var date = new Date(time);
+  var year =  data.getFullYear();
+  var month = date.getMonth() + 1;
+  var days = 0;
+
+  if (month in [1,3,5,7,8,10,12]) {
+    days = 31;
+  } else if (month in [4,6,9,11]) {
+    days = 30;
+  } else {
+    days = 28;
+    if (year%4 === 0) {
+      days = 29;
+    }
+  }
+
+  return days;
+}
+
+
 module.exports = {
 
   db: model,
@@ -52,11 +144,48 @@ module.exports = {
 
   // GET: [/]
   index: function(req, res) {
-    getTweets({}, function(error, tweets) {
+
+    if (req.xhr) {
+      var option = {};
+      var time = req.query.time || 'all';
+      var uid = req.query.userid;
+
+      var option = calculateTimespan(time);
+      option.offset = req.param('offset');
+      option.limit = req.param('limit');
+      option.uid = uid;
+
+      getTweets(option, function(error, tweets) {
+        if (error) {
+          res.send({error:'服务器出错，查询超时!'});
+        } else {
+          convert(tweets);
+          var result = '';
+          for (var i = 0; i < tweets.length; i++) {
+            result += template({tweet:tweets[i]});
+          };
+          res.send({tweets:result, count: tweets.length});
+        }
+      });
+
+      return;
+    }
+
+    var time = req.query.time || 'all';
+    console.log(time);
+    var uid = req.query.userid;
+
+    var option = calculateTimespan(time);
+
+    console.log(option);
+
+    option.uid = uid;
+
+    getTweets(option, function(error, tweets) {
       if (error) {
         res.redirect('404');
       } else {
-        User.find({}).sort('-delete_attributed').limit(10).exec(function(error, users) {
+        User.find({}).sort('-delete_attributed').limit(20).exec(function(error, users) {
           if (error) {
             console.error(error.message);
             res.redirect('404');
@@ -72,24 +201,6 @@ module.exports = {
             });
           }
         });
-      }
-    });
-  },
-
-  // get: [/tweets]
-  getPage: function(req, res) {
-    var offset = req.param('offset');
-    var limit = req.param('limit');
-    getTweets({offset: offset, limit: limit}, function(error, tweets) {
-      if (error) {
-        res.send({error:'服务器出错，查询超时!'});
-      } else {
-        convert(tweets);
-        var result = '';
-        for (var i = 0; i < tweets.length; i++) {
-          result += template({tweet:tweets[i]});
-        };
-        res.send({tweets:result, count: tweets.length});
       }
     });
   },

@@ -77,7 +77,7 @@ window.freeWeibo.Fetcher= (function() {
     self.isPending = true;
     self.spinner = new Spinner(spinOpts).spin(self.target);
 
-    $.get('/tweets', {offset: self.offset, limit: self.limit}, function(data) {
+    $.ajax({data:{offset: self.offset, limit: self.limit}}).done(function(data) {
       if (data.error) {
         self.container.append('<p class="alert">' + data.error + '</p>');
       } else  {

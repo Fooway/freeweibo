@@ -59,7 +59,6 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/about', controller.about);
-app.get('/tweets', controller.getPage);
 app.get('/cancel', controller.unsubscribe);
 app.get('/admin', controller.admin);
 app.get('/login', controller.login);
