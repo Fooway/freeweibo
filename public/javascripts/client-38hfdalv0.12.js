@@ -193,6 +193,11 @@ $(function() {
 
     $(this).parents('li').remove();
     $.post('/delete-user', { data: userid}, function() {});
-});
+  });
+
+  // highlight search item
+  var search = window.location.search.substring(1) || 'time=all';
+  $('.span3 a[href$="' + search + '"]').parents('li').addClass('highlight');
+
 });
 

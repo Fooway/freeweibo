@@ -19,7 +19,7 @@ block content
           ul
             each stat in stats
               li
-                a(href='/?time=' + stat.time, target='_self') #{stat.chinese}
+                a(href='/?time=' + stat.time, target='_self') #{stat.chinese}(#{stat.count})
 
         .hot-users
           h3 按用户查看

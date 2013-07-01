@@ -3,6 +3,7 @@ var path = require('path');
 var model = require('./model')();
 var config = require('./config');
 var crypto = require('crypto');
+var async = require('async');
 var jade = require('jade');
 var User = model.User;
 var Tweet = model.Tweet;
@@ -16,6 +17,8 @@ var userTemplate = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../
 
 var salt = config.option.salt;
 var confLimit = config.option.limit;
+
+setInterval(function() {getTweetsStats(config.stats, function(){});}, 4 * 60 * 60 * 1000);
 
 function getTweets(option, cb) {
   var offset = option.offset || 0;
@@ -48,7 +51,32 @@ function getTweets(option, cb) {
     });
 }
 
-function getTweetsStats(option, cb) {
+
+function getTweetsStats(stats, cb) {
+  if (stats[0].count) {
+    cb();
+  } else {
+    async.map(stats, countTweets, function(err, results){
+    // results is now an array of stats for each file
+    for (var i = 0; i < results.length; i++) {
+      stats[i].count = results[i];
+    };
+    cb();
+    });
+  }
+  
+}
+
+function countTweets(item, cb) {
+  var span = calculateTimespan(item.time);
+  var number;
+
+  Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
+      function (error, count) {
+        number = count;
+        if (error) number = 0;
+        cb(null, number);
+      });
 }
 
 function  convert(tweets) {
@@ -69,10 +97,15 @@ function calculateTimespan(time) {
   var oneWeek = oneDay * 7;
   var temp;
 
-  if (!time || time === 'all') return option;
+  if (!time) return option;
 
   var start = new Date(); // start time point 
   var end = new Date();   // end time point
+
+
+  if (time === 'all') {
+    start.setFullYear(1990);
+  }
 
   if (time === 'today') {
     start.setHours(0, 0, 0, 1);
@@ -185,21 +218,23 @@ module.exports = {
       if (error) {
         res.redirect('404');
       } else {
-        User.find({}).sort('-delete_attributed').limit(20).exec(function(error, users) {
-          if (error) {
-            console.error(error.message);
-            res.redirect('404');
-          } else {
-            convert(tweets);
-            res.render('index', { 
-              title: "FreeWeibo",
-              tweets: tweets,
-              users: users,
-              stats: config.stats,
-              initOffset: tweets.length,
-              initLimit: confLimit
-            });
-          }
+        getTweetsStats(config.stats, function() {
+          User.find({}).sort('-delete_attributed').limit(20).exec(function(error, users) {
+            if (error) {
+              console.error(error.message);
+              res.redirect('404');
+            } else {
+              convert(tweets);
+              res.render('index', { 
+                title: "FreeWeibo",
+                tweets: tweets,
+                users: users,
+                stats: config.stats,
+                initOffset: tweets.length,
+                initLimit: confLimit
+              });
+            }
+          });
         });
       }
     });

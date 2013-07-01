@@ -14,38 +14,31 @@ var config = module.exports = {
   stats: [
     { 
       time: 'all',
-      chinese: '所有',
-      count: 56
+      chinese: '所有'
     },
     { 
       time: 'today',
-      chinese: '今天',
-      count: 56
+      chinese: '今天'
     },
     { 
       time: 'yesterday',
-      chinese: '昨天',
-      count: 34
+      chinese: '昨天'
     },
     { 
       time: 'thisweek',
-      chinese: '本周',
-      count: 81
+      chinese: '本周'
     },
     { 
       time: 'lastweek',
-      chinese: '上周',
-      count: 10
+      chinese: '上周'
     },
     { 
       time: 'thismonth',
       chinese: '本月',
-      count: 112
     },
     { 
       time: 'lastmonth',
-      chinese: '上月',
-      count: 78
+      chinese: '上月'
     }
   ],
 

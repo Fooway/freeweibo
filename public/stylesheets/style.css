@@ -95,6 +95,17 @@ body .tweets .middle_img:hover {
 body .row-fluid .span3 {
   float: right;
 }
+body .row-fluid .span3 li {
+  padding: 10px;
+}
+body .row-fluid .span3 li.highlight {
+  background-color: #966;
+  color: #eee;
+  border-radius: 10px;
+}
+body .row-fluid .span3 li.highlight a {
+  color: #eee;
+}
 body .form-horizontal .control-group {
   width: 60%;
   margin: 20px auto;
