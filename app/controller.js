@@ -67,6 +67,7 @@ function calculateTimespan(time) {
   var option = {};
   var oneDay = 24 * 60 * 60 * 1000;
   var oneWeek = oneDay * 7;
+  var temp;
 
   if (!time || time === 'all') return option;
 
@@ -74,22 +75,22 @@ function calculateTimespan(time) {
   var end = new Date();   // end time point
 
   if (time === 'today') {
-    start.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 1);
   }
 
   if (time === 'yesterday') {
-    start.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 1);
     start = start - oneDay;
     end.setHours(0, 0, 0, 0);
   }
 
   if (time === 'thisweek') {
-    start.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 1);
     start = start - oneDay * start.getDay();
   }
 
   if (time === 'lastweek') {
-    start.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 1);
     start = start - oneDay * (start.getDay() + 7);
 
     end.setHours(0, 0, 0, 0);
@@ -101,9 +102,12 @@ function calculateTimespan(time) {
     start = start - oneDay * start.getDate();
   }
 
-  if (time === 'lastmoth') {
+  if (time === 'lastmonth') {
     start.setHours(0, 0, 0, 0);
-    start = start - oneDay * (start.getDate() + getMonthDays(start - 1000));
+    temp = start.getDate();
+    start -= oneDay * temp;
+    temp = getMonthDays(start - 1000);
+    start -= oneDay * temp;
 
     end.setHours(0, 0, 0, 0);
     end = end - oneDay * end.getDate();
@@ -117,7 +121,7 @@ function calculateTimespan(time) {
 
 function getMonthDays(time) {
   var date = new Date(time);
-  var year =  data.getFullYear();
+  var year =  date.getFullYear();
   var month = date.getMonth() + 1;
   var days = 0;
 
@@ -172,12 +176,8 @@ module.exports = {
     }
 
     var time = req.query.time || 'all';
-    console.log(time);
     var uid = req.query.userid;
-
     var option = calculateTimespan(time);
-
-    console.log(option);
 
     option.uid = uid;
 

@@ -12,6 +12,9 @@ var controller = require('./app/controller');
 var mail = require('./app/mail');
 var log4node = require('log4node');
 
+// change timezone to HongKong(GMT+8)
+process.env.TZ = 'Hongkong';
+
 var log = new log4node.Log4Node({level: 'info', file: path.normalize(__dirname + '/logs/run.log')});
 
 config.log = log;
