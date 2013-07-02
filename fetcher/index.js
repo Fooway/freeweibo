@@ -144,7 +144,7 @@ function fetchTweets(user, callback) {
       callback();
       return;
     }
-    if (tweets && !tweets.length) {
+    if (!tweets || !tweets.length) {
       log.info('no new tweets.');
       callback();
       return;
