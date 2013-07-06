@@ -19,32 +19,32 @@ var log;
 getInterfaceAddress();
 
 var account = { 
-  screen_name: "不停跳",
-  source: 2792117054,
-  access_token: "2.00ZBLjNCCM8xCD7abb61ca7b03VNAl",
+  screen_name: "freeman2013_28472",
+  source:3364683177,
+  access_token: "2.00cr8KvDVnrhfD76809f820axUYeMB",
   tokens: [
-    "2.00ZBLjNCCM8xCD7abb61ca7b03VNAl",
-    "2.00ZBLjNC0a21C4d7fe3327355YekJB",
-    "2.00ZBLjNCV1_tFB592d9b94c00a4Cjj",
-    "2.00ZBLjNCrOvlSE0c33f283950Ps5iZ",
-    "2.00ZBLjNC0JQOf7d9858deffa0TO2cU",
-    "2.00ZBLjNC09Ffk6a4387785704fDtXD",
-    "2.00ZBLjNCPDfDGC04d3053333P3P2QE",
-    "2.00ZBLjNCZAQEZDa6a3cbc1d114lKCC",
-    "2.00ZBLjNCP6qq8Ede113c52c6DbkRwC",
-    "2.00ZBLjNC8MBc7Ea22fcf780a7UdgSE",
+    "2.00cr8KvDVnrhfD76809f820axUYeMB",
+    "2.00cr8KvD8qT46D713e2584d3XCBNcE",
+    "2.00cr8KvDOvcrdCf631efcd310KLQ2t",
+    "2.00cr8KvD02HK4J22c27464e90bK7B2",
+    "2.00cr8KvD0JAm2F808564a782bErqDC",
+    "2.00cr8KvDHBHPmB356576df34rCbiaD",
+    "2.00cr8KvD077dPG322bb29ce01U2QMC",
+    "2.00cr8KvDR81DCEc22af527dcdyRv4D",
+    "2.00cr8KvDnVNYCB1dcb5949d8qS5uOB",
+    "2.00cr8KvDy19eIDb88994c64egxQl4D",
   ],
   sources: [
-    2792117054,
-    340410602,
-    1003196859,
-    3941926821,
-    394011001,
-    380529430,
-    1921796469,
-    3266585107,
-    4076086909,
-    4057777143
+    3364683177,
+    3123403167,
+    2421323772,
+    138507463,
+    79071089,
+    1628998857,
+    92384490,
+    3694877555,
+    953840599,
+    2876251236
   ]
 };
 
@@ -64,6 +64,16 @@ var api = {
 
   get_tweet:  {    // get a tweet by id
     url: "/2/statuses/show.json", 
+    param: {}
+  },
+
+  get_friends: {  // get friends tweets
+    url: "/2/statuses/home_timeline.json", 
+    param: {}
+  },
+
+  add_friend: {
+    url: "/2/friendships/create.json",
     param: {}
   },
 
@@ -117,6 +127,40 @@ module.exports = function() {
           return;
         }
         callback(null, data.statuses);
+      });
+    },
+
+    getFriendTweets: function(option /* uid or name */, callback) {
+      if (typeof option == 'function') {
+        callback = option;
+        option = {};
+      }
+      get(generateUrl('get_friends', option), function(error, data) { 
+        if (error)  {
+          callback(error);
+          return;
+        }
+        callback(null, data.statuses);
+      });
+    },
+
+    addFriend: function(option /* uid or name */, callback) {
+      if (typeof option == 'function') {
+        callback = option;
+        option = {};
+      }
+      post(generateUrl('add_friend', option), function(error, data) { 
+        if (error)  {
+          callback(error);
+          return;
+        }
+
+        if (data.error) {
+          callback(data.error);
+          return;
+        }
+
+        callback(null, data);
       });
     },
 
@@ -201,7 +245,7 @@ module.exports = function() {
 
 // request api function
 function get(url, callback) {
-  https.get('https://' + api.host + url, function(res) {
+ https.get('https://' + api.host + url, function(res) {
     var chunks = [];
     res.on('data', function(chunk) { chunks.push(chunk); });
     res.on('end', function() {
@@ -227,6 +271,49 @@ function get(url, callback) {
   });
 }
 
+function post(url, callback) {
+var data = url.split('?');
+
+  // An object of options to indicate where to post to
+  var options = {
+      host: api.host,
+      path: data[0],
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data[1].length
+      }
+  };
+
+  // Set up the request
+  var req = https.request(options, function(res) {
+    var chunks = [];
+    res.on('data', function(chunk) { chunks.push(chunk); });
+    res.on('end', function() {
+      var buffer = Buffer.concat(chunks);
+      try {
+        data = JSON.parse(buffer.toString());
+      } catch (e) {
+        chunks = [];
+        buffer = [];
+        log.error(e.stack);
+        callback(e, null);
+        return;
+      }
+
+      // debug point
+      callback(null, data);
+
+      buffer = [];
+      chunks = [];
+    })
+  }).on('error', function(e) {
+    callback(e, null);
+  });
+
+  // post the data
+  req.end(data[1]);
+}
 
 function generateUrl(method, option) {
   var param = extend({}, api[method].param, option);

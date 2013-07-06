@@ -35,7 +35,7 @@ var fetcher = module.exports = function (db, config) {
     api.setLog(log);
   }
 
-  fetch();
+  addFriendFromDb();
   check();
   deleteOld();
 
@@ -45,6 +45,39 @@ var fetcher = module.exports = function (db, config) {
 };
 
 
+function addFriendFromDb() {
+
+  api.getUserInfo({screen_name: 'freeman2013_28472'}, function(error, user) {
+    if (error || (user && user.error)) {
+      var error = error || user.error;
+      log.error(error);
+    } else {
+      if (user.friends_count < 10) {
+        model.User.find({}, function (error, users) {
+          async.eachSeries(users, function(user, cb) {
+            // need to delay 1s for each tweet
+            // so we will not exceed the api access frequency
+            // otherwise, weibo will block our access temporarily
+            setTimeout(function() {
+              log.info('add user [' + user.name + ']... ');
+              api.addFriend({uid: user.uid}, function(error, data) {
+                if (!error) {
+                  log.info('add success... ');
+                } else {
+                  log.error(error);
+                }
+                cb();
+              });
+            }, API_REQUEST_INTERVAL_BY_SEC * 1000);
+          }, fetch);
+        });
+      } else {
+        log.info('key user friends ok.');
+        fetch();
+      }
+    }
+  });
+}
 
 // check all the tweets' status in db.
 function check() {
@@ -72,7 +105,7 @@ function check() {
             {$inc:{delete_attributed:1}}, {upsert: false},function(){});
           log.info('tweet ' + tweet.tid + ' unavailabe');
           fetchUser({uid: tweet.user_id}, function(){});
-        }
+         }
         if (response.id) {
           model.Tweet.update(
             { tid: tweet.tid }, 
@@ -105,65 +138,45 @@ function check() {
 // fetch tweets for users
 function fetch() {
   log.info('start fetch...');
-  model.User.find(function(error, users) {
-    if (error) {
-      console.error(error.message);
-      return;
-    }
+  model.User.find({name: 'freeman2013_28472'}, function(error, users) {
+    if (error) return;
+
     if (users.length == 0) {
-      log.info('initialize tweeters...');
-      async.eachSeries(tweeters, function(tweeter, cb) {
-        // need to delay for each tweet
-        // so we will not exceed the api access frequency
-        // otherwise, weibo will block our access temporarily
-        setTimeout(function() {
-          fetchUser({name: tweeter}, function() { cb();});
-        }, API_REQUEST_INTERVAL_BY_SEC * 1000);
-      }, function() {
-        setTimeout(fetch, 10 * 1000);
+      model.User.create({
+        name: 'freeman2013_28472',
+        uid: 432784392,
+        latest_tid: 0
+      }, function(error, user) {
+        fetchTweets(user.latest_tid);
       });
-      return;
+    } else {
+      fetchTweets(users[0].latest_tid);
     }
-    async.eachSeries(users, function(user, cb) {
-      setTimeout(function() { 
-        log.info('fetching user [ ' + user.name + ']... ');
-        fetchTweets(user, function() {
-          cb();});
-      }, API_REQUEST_INTERVAL_BY_SEC * 1000);
-    }, function(results) {
-      setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
-    });
   });
 }
 
 // api get wrapper for getting user's latest tweets
-function fetchTweets(user, callback) {
-  api.getUserTweets({uid: user.uid, since_id: user.latest_tid}, function(error, tweets) {
-    if (error) { 
-      log.error(error);
-      callback();
-      return;
-    }
-    if (!tweets || !tweets.length) {
-      log.info('no new tweets.');
-      callback();
-      return;
-    }
-
-    log.info('fetched ' + tweets.length + ' tweets.');
-    model.User.update({uid: user.uid}, {latest_tid: tweets[0].id}, function(error) {
+function fetchTweets(tid) {
+    api.getFriendTweets({since_id: tid}, function(error, tweets) {
       if (error) { 
         log.error(error);
+        return;
       }
-    });
+      if (!tweets || !tweets.length) {
+        log.info('no new tweets.');
+        return;
+      }
 
-    async.eachSeries(tweets, function(tweet, cb){ 
-      saveTweet(tweet, cb);
-    }, function(results){
-      callback();
-      tweets = {};
+      log.info('fetched ' + tweets.length + ' tweets.');
+
+      model.User.update({name: 'freeman2013_28472'}, {latest_tid: tweets[0].id}, function() {});
+      async.eachSeries(tweets, function(tweet, cb){ 
+        saveTweet(tweet, cb);
+      }, function(results){
+        setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 60 *1000);
+        tweets = {};
+      });
     });
-  });
 }
 
 
@@ -307,7 +320,12 @@ function fetchUser(option, cb) {
               } else {
                 cb(null, user);
               }
+              api.addFriend({uid: tweet.user_id}, function(error, friend) {
+                log.info('add friend [' + friend.screen_name + '] successful!');
+              });
+
             });
+
           } else {
             cb('not enough followers!');
           }
