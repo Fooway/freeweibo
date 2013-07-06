@@ -139,7 +139,10 @@ function check() {
 function fetch() {
   log.info('start fetch...');
   model.User.find({name: 'freeman2013_28472'}, function(error, users) {
-    if (error) return;
+    if (error) {
+      setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
+      return;
+    }
 
     if (users.length == 0) {
       model.User.create({
@@ -147,23 +150,29 @@ function fetch() {
         uid: 432784392,
         latest_tid: 0
       }, function(error, user) {
-        fetchTweets(user.latest_tid);
+        fetchTweets(user.latest_tid, function() {
+          setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
+        });
       });
     } else {
-      fetchTweets(users[0].latest_tid);
+      fetchTweets(users[0].latest_tid, function() {
+          setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
+      });
     }
   });
 }
 
 // api get wrapper for getting user's latest tweets
-function fetchTweets(tid) {
+function fetchTweets(tid, callback) {
     api.getFriendTweets({since_id: tid}, function(error, tweets) {
       if (error) { 
         log.error(error);
+        callback();
         return;
       }
       if (!tweets || !tweets.length) {
         log.info('no new tweets.');
+        callback();
         return;
       }
 
@@ -173,7 +182,7 @@ function fetchTweets(tid) {
       async.eachSeries(tweets, function(tweet, cb){ 
         saveTweet(tweet, cb);
       }, function(results){
-        setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 60 *1000);
+        callback();
         tweets = {};
       });
     });
