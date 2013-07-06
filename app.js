@@ -26,6 +26,7 @@ process.on('uncaughtException', function (e) {
     sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
     text: '>>> ' + e.stack
     });
+  process.exit(0);
 });
 
 
