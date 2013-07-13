@@ -37,7 +37,7 @@ module.exports = function(model, config) {
       service: "Gmail",
         auth: {
           user: "freeweibo.me@gmail.com",
-        pass: "Everdance1983"
+        pass: "*2%^jdskE#092"
         }
     });
 
