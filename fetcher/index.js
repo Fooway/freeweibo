@@ -26,8 +26,11 @@ function timeConfig(option) {
 }
 
 var fetcher = module.exports = function (db, config) {
+
   if (!db) { return; }
+
   model = db;
+
   if (config) {
     timeConfig(config.option);
     tweeters = config.tweeters;
@@ -265,7 +268,7 @@ function deleteOld() {
   model.Tweet.find({status: 0}).
    where('pic_name').ne('').
    where('create_at').lt(now - DELETE_INTERVAL_BY_DATE * 24 * 60 * 60 * 1000).
-   select('tid image_name').
+   select('tid pic_name').
    exec(function(error, tweets) {
     if (error) {
       log.error(error);
@@ -273,7 +276,7 @@ function deleteOld() {
     } else {
       async.each(tweets, function(tweet, cb) {
         model.Tweet.remove({tid: tweet.tid}, function(){});
-        var files = api.imagePath(tweet.image_name);
+        var files = api.imagePath(tweet.pic_name);
 
         log.info('deleting tweet: ' + tweet.tid);
 

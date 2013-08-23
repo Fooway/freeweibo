@@ -1,4 +1,4 @@
 node_modules/
 logs/
 pids/
-public/images/tweets/*.jpg
+public/images/tweets/
