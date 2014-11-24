@@ -3,7 +3,7 @@
  * */
 
 var fs = require('fs');
-var api = require('./api')();
+var api = require('./api');
 var async = require('async');
 var model = require('../app/model')();
 var log = require('../app/log');
@@ -15,10 +15,10 @@ var check = require('./check');
 module.exports = function () {
   var user;
 
-  async.eachSeries([
+  async.series([
     // check key user existance
     function (cb) {
-      api.getUserInfo({
+      api.getUser({
         screen_name: config.key_user
       }, function(error, resp) {
         if (error || (resp && resp.error)) {
@@ -60,7 +60,7 @@ module.exports = function () {
           // so we will not exceed the api access frequency
           // otherwise, weibo will block our access temporarily
           log.info('add friend [' + seed + ']... ');
-          api.addFriend({name: seed}, function(error, data) {
+          api.addFriend({screen_name: seed}, function(error, data) {
             log.error(error);
             setTimeout(callback, config.TM.API_REQUEST_INTERVAL);
           });

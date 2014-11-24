@@ -3,7 +3,7 @@
  * */
 
 var async = require('async');
-var api = require('./api')();
+var api = require('./api');
 var config = require('./config');
 var fetch = require('./fetch');
 var model = require('../app/model')();

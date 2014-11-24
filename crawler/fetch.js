@@ -1,7 +1,7 @@
 /*
  * fetch task for crawler
  * */
-var api = require('./api')();
+var api = require('./api');
 var async = require('async');
 var model = require('../app/model')();
 var log = require('../app/log');
@@ -125,7 +125,7 @@ function addUser(query, done) {
       query.screen_name = option.name;
       delete query.name;
 
-      api.getUserInfo(query, function(error, resp) {
+      api.getUser(query, function(error, resp) {
         if (error || (resp && resp.error)) {
           var error = error || resp.error;
           log.error(error);
