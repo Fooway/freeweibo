@@ -23,13 +23,36 @@ module.exports = function () {
       }, function(error, resp) {
         if (error || (resp && resp.error)) {
           log.error(error || resp.error);
+          cb(error || resp.error);
         } else {
           user = resp;
+          cb();
         }
-        cb();
       });
     },
-    // seed a few users as friends
+
+    // create key user in db
+    function (cb) {
+      model.User.findOne({type: 'key_user'}, function(err, doc) {
+        if (err) return cb(err);
+
+        if (!doc) {
+          model.User.create({
+            name: user.name,
+            uid: user.uid,
+            type: 'key_user',
+            latest_tid: 0
+          }, function(error, doc) {
+            cb(error);
+          });
+        } else {
+          cb();
+        }
+      });
+    },
+    // seed a few users as key user's friends
+    // NOTE: under Weibo's new API, we can only fetch friends tweets
+    // even with registered AppID
     function (cb) {
       if (user.friends_count < 10) {
         async.eachSeries(seedTweeters, function(seed, callback) {
@@ -48,8 +71,12 @@ module.exports = function () {
     }
   ], function (err) {
     // start fetch and check task
-    fetch();
-    check();
+    if (err) {
+      log.err(err);
+    } else {
+      fetch.tweets();
+      check();
+    }
   });
 };
 

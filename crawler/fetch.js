@@ -4,68 +4,60 @@
 var api = require('./api')();
 var async = require('async');
 var model = require('../app/model')();
+var log = require('../app/log');
 
-// fetch tweets for users
-function fetch() {
+// getting key user's latest tweets
+function fetchTweets() {
   log.info('start fetch...');
-  model.User.find({name: 'freeman2013_28472'}, function(error, users) {
-    if (error) {
-      setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
-      return;
-    }
 
-    if (users.length == 0) {
-      model.User.create({
-        name: 'freeman2013_28472',
-        uid: 432784392,
-        latest_tid: 0
-      }, function(error, user) {
-        fetchTweets(user.latest_tid, function() {
-          setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
-        });
+  var keyUser;
+  var tweets;
+
+  async.eachSeries([
+    // get key user
+    function (cb) {
+      model.User.findOne({type: 'key_user'}, function (err, user) {
+        keyUser = user;
+        cb(err);
       });
-    } else {
-      fetchTweets(users[0].latest_tid, function() {
-          setTimeout(fetch, FETCH_INTERVAL_BY_MINUTE * 60 * 1000);
+    },
+    // fetch new tweets
+    function (cb) {
+      api.getTweets(keyUser.latest_tid, function (error, resp) {
+        if (error) { 
+          log.error(error);
+          cb(error);
+        } else {
+          tweets = resp;
+          if (tweets[0]) keyUser.latest_tid = tweets[0].id;
+          keyUser.save(function (err, doc) {
+            log.error(err);
+          });
+          cb();
+        } 
       });
-    }
-  });
-}
-
-// api get wrapper for getting user's latest tweets
-function fetchTweets(tid, callback) {
-    api.getFriendTweets({since_id: tid}, function(error, tweets) {
-      if (error) { 
-        log.error(error);
-        callback();
-        return;
-      }
-      if (!tweets || !tweets.length) {
-        log.info('no new tweets.');
-        callback();
-        return;
-      }
-
+    },
+    // save tweets
+    function (cb) {
       log.info('fetched ' + tweets.length + ' tweets.');
-
-      model.User.update({name: 'freeman2013_28472'}, {latest_tid: tweets[0].id}, function() {});
       async.eachSeries(tweets, function(tweet, cb){ 
-        saveTweet(tweet, cb);
-      }, function(results){
-        callback();
-        tweets = {};
+        _saveTweet(tweet, cb);
+      }, function(err){
+        cb();
       });
-    });
+    }
+  ], function (err) {
+    setTimeout(fetchTweets, config.TM);
+  });
+
 }
 
 
-function saveTweet(tweet, cb) {
+function _saveTweet(tweet, cb) {
   var uid = 0;
   var name = '';
 
-  if (!tweet) {
-    return cb();
-  }
+  if (!tweet) return cb();
 
   var attributed = tweet.user.id;
   // only save original tweet
@@ -79,101 +71,109 @@ function saveTweet(tweet, cb) {
     var img = tweet.user.profile_image_url;
   }
 
-  model.Tweet.find({tid: tweet.id}, function(error, old) {
+  model.Tweet.findOne({tid: tweet.id}, function(error, old) {
+    if (error || old) return cb(err);
 
-    if (error || old.length == 0) {
-      api.getImage(tweet, function(error, image_name) {
+    api.getImage(tweet, function(error, image_name) {
+      try {
+        var time = new Date(tweet.created_at);
+      } catch(e) {
+        time  = new Date();
+      }
 
-        var time;
-        try {
-          time = new Date(tweet.created_at);
-        } catch(e) {
-          log.error(e);
-          time  = new Date();
-        }
-
-        model.Tweet.create({
-          tid: tweet.id,
-          status: 0,
-          create_at: time.valueOf(),
-          delete_time: 0,
-          sended: false,
-          text: tweet.text,
-          origin_pic_url: tweet.original_pic || '', 
-          user_id: uid,
-          user_name: name,
-          user_img: img,
-          pic_name: image_name,
-          comments_count: tweet.comments_count,
-          reposts_count: tweet.reposts_count,
-          attributed_uid: attributed
-        }, function(error, newtweet) {
-          if (error) {
-            log.error(error);
-          }
-          cb();
-        });
+      model.Tweet.create({
+        tid: tweet.id,
+        status: 0,
+        create_at: time.valueOf(),
+        delete_time: 0,
+        sended: false,
+        text: tweet.text,
+        origin_pic_url: tweet.original_pic || '', 
+        user_id: uid,
+        user_name: name,
+        user_img: img,
+        pic_name: image_name,
+        comments_count: tweet.comments_count,
+        reposts_count: tweet.reposts_count,
+        attributed_uid: attributed
+      }, function(error, newtweet) {
+        log.error(error);
+        cb();
       });
-    } else {
-      cb();
-    }
+
+    });
   });
 }
 
-function fetchUser(option, cb) {
-  model.User.find(option, function(error, user) {
-    if (error) {
-      log.error(error);
-      cb(error);
-      return;
-    }
-    if (!user.length) { 
-      option.screen_name = option.name;
-      delete option.name;
-      api.getUserInfo(option, function(error, user) {
-        if (error || (user && user.error)) {
-          var error = error || user.error;
+// add new user to db and as friend of key user
+function addUser(query, done) {
+  var user;
+
+  async.eachSeries([
+    // check if exists in db
+    function (cb) {
+      model.User.findOne(query, function(error, user) {
+        if (error || user) {
+          cb(error || 'user already exists');
+        } else {
+          cb();
+        }
+      });
+    },
+    // get user info
+    function (cb) {
+      query.screen_name = option.name;
+      delete query.name;
+
+      api.getUserInfo(query, function(error, resp) {
+        if (error || (resp && resp.error)) {
+          var error = error || resp.error;
           log.error(error);
           cb(error);
         } else {
-
-          if (user.followers_count > 1000) {
-            log.info('add ' + user.screen_name + ', has ' +
-              user.followers_count + ' followers.');
-            var newuser = new model.User({
-              name: user.screen_name, 
-                uid: user.id,
-                img_url: user.profile_image_url,
-                latest_tid: 0,
-                location: user.location,
-                description: user.description,
-                gender: user.gender,
-                followers_cnt: user.followers_count,
-                friends_cnt: user.friends_count,
-                tweets_cnt: user.statuses_count,
-                created_date: (new Date()).valueOf()
-            });
-            newuser.save(function (error, user) { 
-              if(error) { 
-                log.error(error);
-                cb(error);
-              } else {
-                cb(null, user);
-              }
-              api.addFriend({uid: tweet.user_id}, function(error, friend) {
-                log.info('add friend [' + friend.screen_name + '] successful!');
-              });
-
-            });
-
-          } else {
-            cb('not enough followers!');
-          }
+          user = resp;
+          cb();
         }
       });
-    } else {
-      cb('user already exists!');
-    }
-  });
 
+    }
+    // save user
+    function (cb) {
+      if (user.followers_count < config.USER_FOLLOW_MIN) {
+        return cb('user followers count less than ' + config.USER_FOLLOW_MIN);
+      }
+
+      log.info('add ' + user.screen_name + ', has ' +
+               user.followers_count + ' followers.');
+
+      var newuser = new model.User({
+        name: user.screen_name, 
+        uid: user.id,
+        img_url: user.profile_image_url,
+        latest_tid: 0,
+        location: user.location,
+        description: user.description,
+        gender: user.gender,
+        followers_cnt: user.followers_count,
+        friends_cnt: user.friends_count,
+        tweets_cnt: user.statuses_count,
+        created_date: (new Date()).valueOf()
+      });
+
+      newuser.save(function (error, user) { 
+        cb(error);
+      });
+
+      api.addFriend({uid: tweet.user_id}, function(error, friend) {
+        log.info('add friend [' + friend.screen_name + '] successful!');
+      });
+    }
+  ], function (err) {
+    done(err);
+  });
+}
+
+module.exports = {
+  tweets: fetchTweets,
+  user: addUser
 }
