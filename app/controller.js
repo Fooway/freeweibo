@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var model = require('./model')();
 var config = require('./config');
+var fetch = require('../crawler/fetch');
 var crypto = require('crypto');
 var async = require('async');
 var jade = require('jade');
@@ -42,13 +43,13 @@ function getTweets(option, cb) {
   }
 
   query.limit(limit).skip(offset).sort('-delete_time').exec(function(error, tweets) {
-      if (error) {
-        console.error(error.message);
-        cb(error);
-      } else {
-        cb(null, tweets);
-      }
-    });
+    if (error) {
+      log.error(error.message);
+      cb(error);
+    } else {
+      cb(null, tweets);
+    }
+  });
 }
 
 
@@ -56,7 +57,17 @@ function getTweetsStats(stats, cb) {
   if (stats[0].count) {
     cb();
   } else {
-    async.map(stats, countTweets, function(err, results){
+    async.map(stats, function (item, cb) {
+      var span = calculateTimespan(item.time);
+      var number;
+
+      Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
+                  function (error, count) {
+                    number = count;
+                    if (error) number = 0;
+                    cb(null, number);
+                  });
+    }, function(err, results){
     // results is now an array of stats for each file
     for (var i = 0; i < results.length; i++) {
       stats[i].count = results[i];
@@ -67,25 +78,14 @@ function getTweetsStats(stats, cb) {
   
 }
 
-function countTweets(item, cb) {
-  var span = calculateTimespan(item.time);
-  var number;
-
-  Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
-              function (error, count) {
-                number = count;
-                if (error) number = 0;
-                cb(null, number);
-              });
-}
-
 function  convert(tweets) {
   for (var i = 0; i < tweets.length; i++) {
     var date = new Date(tweets[i].create_at);
     tweets[i].date = date.toLocaleTimeString("en-US") + ' ' + date.getDate() +
                      '/' + (date.getMonth()+1) + '/' + date.getFullYear();
     if (tweets[i].text) {
-      tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g, '<a href="$1" target="_blank">$1</a>');
+      tweets[i].text = tweets[i].text.replace(/(?:[^"])(http:\/\/[\/.=?\w]*)/g,
+                                              '<a href="$1" target="_blank">$1</a>');
     }
   };
 }
@@ -175,22 +175,16 @@ function getMonthDays(time) {
 
 module.exports = {
 
-  db: model,
-
-  initService: function (param) { service = param;},
-
   // GET: [/]
   index: function(req, res) {
+    var time = req.query.time || 'all';
+    var uid = req.query.userid;
+    var option = calculateTimespan(time);
+    option.uid = uid;
 
     if (req.xhr) {
-      var option = {};
-      var time = req.query.time || 'all';
-      var uid = req.query.userid;
-
-      var option = calculateTimespan(time);
       option.offset = req.param('offset');
       option.limit = req.param('limit');
-      option.uid = uid;
 
       getTweets(option, function(error, tweets) {
         if (error) {
@@ -207,12 +201,6 @@ module.exports = {
 
       return;
     }
-
-    var time = req.query.time || 'all';
-    var uid = req.query.userid;
-    var option = calculateTimespan(time);
-
-    option.uid = uid;
 
     getTweets(option, function(error, tweets) {
       if (error) {
@@ -305,24 +293,23 @@ module.exports = {
     }
   },
 
-  // POST: [/add-user, /delete-user]
-  adminUsers: function(req, res) {
-    if (req.path === '/add-user') {
-      var userName = req.param('data');
-      console.log(userName);
-      service.addUser({name: userName}, function(error, user) {
-        if (error) {
-          res.json({error: error});
-        } else {
-          res.json({data: userTemplate({user:user})});
-        }
-      });
+  // POST: /user
+  addUser: function(req, res) {
+    var userName = req.param('data');
+    fetch.user({name: userName}, function(error, user) {
+      if (error) {
+        res.json({error: error});
+      } else {
+        res.json({data: userTemplate({user:user})});
+      }
+    });
+  },
 
-    } else {
-      var userId = req.param('data');
-      console.log('remove user ' + userId);
-      User.remove({uid: userId}, function() {});
-      res.json({});
-    }
+  removeUser: function (req, res) {
+    var userId = req.param('data');
+    log.info('remove user ' + userId);
+    fetch.remove({uid: userId}, function() {
+      res.json('ok');
+    });
   }
 };
