@@ -6,17 +6,17 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "3.2.0",
-    "jade": "*",
-    "stylus": "0.32.0",
     "async": "*",
-    "extend":"*",
-    "request": "*",
-    "debug": "*",
-    "mkdirp": "*",
-    "nodemailer": "*",
-    "log4node": "*",
     "cron": "*",
-    "mongoose":"*"
+    "debug": "*",
+    "express": "3.2.0",
+    "extend": "*",
+    "jade": "*",
+    "log4node": "*",
+    "mkdirp": "*",
+    "mongoose": "*",
+    "nodemailer": "*",
+    "request": "^2.48.0",
+    "stylus": "0.32.0"
   }
 }

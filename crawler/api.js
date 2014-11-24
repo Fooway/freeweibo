@@ -12,29 +12,14 @@ var extend = require('extend');
 var async = require('async');
 var path = require('path');
 var mkdirp= require('mkdirp');
+var log = require('../app/log');
 
 var IPs = { v4:[], v6:[]};
-var log;
 
 getInterfaceAddress();
 
 var account = { 
-  screen_name: "freeman2013_28472",
-  source:3364683177,
-  access_token: "2.00cr8KvDVnrhfD76809f820axUYeMB",
-  tokens: [
-    "2.00cr8KvDVnrhfD76809f820axUYeMB",
-    "2.00cr8KvD8qT46D713e2584d3XCBNcE",
-    "2.00cr8KvDOvcrdCf631efcd310KLQ2t",
-    "2.00cr8KvD02HK4J22c27464e90bK7B2",
-    "2.00cr8KvD0JAm2F808564a782bErqDC",
-    "2.00cr8KvDHBHPmB356576df34rCbiaD",
-    "2.00cr8KvD077dPG322bb29ce01U2QMC",
-    "2.00cr8KvDR81DCEc22af527dcdyRv4D",
-    "2.00cr8KvDnVNYCB1dcb5949d8qS5uOB",
-    "2.00cr8KvDy19eIDb88994c64egxQl4D",
-  ],
-  sources: [
+  AppIds: [
     3364683177,
     3123403167,
     2421323772,
@@ -87,7 +72,7 @@ var api = {
 module.exports = function() {
 
   var img_dir = ''; 
-  var imagePath = function(basename) {
+  var imagePath = function (basename) {
     var files = [];
     if (!img_dir) {
       img_dir = path.normalize(path.join(__dirname, '../public/images/tweets/'));
@@ -107,7 +92,6 @@ module.exports = function() {
   var keyIndex = 0;
   function changeAppKey() {
     account.source = account.sources[keyIndex];
-    account.access_token = account.tokens[keyIndex];
     keyIndex = (++keyIndex)%10; 
     setTimeout(changeAppKey, 3*60*1000);
   }
@@ -272,17 +256,17 @@ function get(url, callback) {
 }
 
 function post(url, callback) {
-var data = url.split('?');
+  var data = url.split('?');
 
   // An object of options to indicate where to post to
   var options = {
-      host: api.host,
-      path: data[0],
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': data[1].length
-      }
+    host: api.host,
+    path: data[0],
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': data[1].length
+    }
   };
 
   // Set up the request
