@@ -5,78 +5,51 @@
 var fs = require('fs');
 var api = require('./api')();
 var async = require('async');
+var model = require('../app/model')();
+var log = require('../app/log');
+var seedTweeters = require('./seed-tweeters');
+var config = require('./config');
+var fetch = require('./fetch');
+var check = require('./check');
 
-// mongodb model
-var model = {};
-var log;
-var tweeters = [];
-var DELETE_INTERVAL_BY_DATE = 20;
-var FETCH_INTERVAL_BY_MINUTE = 1; 
-var CHECK_INTERVAL_BY_MINUTE = 66;
-var API_REQUEST_INTERVAL_BY_SEC = 2;
-var CHECK_SELECT_TWEETS_DATE = 10;
+module.exports = function () {
+  var user;
 
-function timeConfig(option) {
-  var tmp;
-  (tmp = option.delete_interval_days) ? (DELETE_INTERVAL_BY_DATE = tmp):null;
-  (tmp = option.fetch_interval_mins) ? (FETCH_INTERVAL_BY_MINUTE = tmp):null;
-  (tmp = option.check_interval_mins) ? (CHECK_INTERVAL_BY_MINUTE = tmp):null;
-  (tmp = option.api_request_interval_secs) ? (API_REQUEST_INTERVAL_BY_SEC = tmp):null;
-  (tmp = option.check_select_tweets_days) ? (CHECK_SELECT_TWEETS_DATE= tmp):null;
-}
-
-var fetcher = module.exports = function (db, config) {
-
-  if (!db) { return; }
-
-  model = db;
-
-  if (config) {
-    timeConfig(config.option);
-    tweeters = config.tweeters;
-    log = config.log;
-    api.setLog(log);
-  }
-
-  addFriendFromDb();
-  check();
-  deleteOld();
-
-  return {
-    addUser: fetchUser
-  };
-};
-
-
-function addFriendFromDb() {
-
-  api.getUserInfo({screen_name: 'freeman2013_28472'}, function(error, user) {
-    if (error || (user && user.error)) {
-      var error = error || user.error;
-      log.error(error);
-    } else {
+  async.eachSeries([
+    // check key user existance
+    function (cb) {
+      api.getUserInfo({
+        screen_name: config.key_user
+      }, function(error, resp) {
+        if (error || (resp && resp.error)) {
+          log.error(error || resp.error);
+        } else {
+          user = resp;
+        }
+        cb();
+      });
+    },
+    // seed a few users as friends
+    function (cb) {
       if (user.friends_count < 10) {
-        model.User.find({}, function (error, users) {
-          async.eachSeries(users, function(user, cb) {
-            // need to delay 1s for each tweet
-            // so we will not exceed the api access frequency
-            // otherwise, weibo will block our access temporarily
-            setTimeout(function() {
-              log.info('add user [' + user.name + ']... ');
-              api.addFriend({uid: user.uid}, function(error, data) {
-                if (error) {
-                  log.error(error);
-                }
-                cb();
-              });
-            }, API_REQUEST_INTERVAL_BY_SEC * 1000);
-          }, fetch);
+        async.eachSeries(seedTweeters, function(seed, callback) {
+          // need to delay 1s for each tweet
+          // so we will not exceed the api access frequency
+          // otherwise, weibo will block our access temporarily
+          log.info('add friend [' + seed + ']... ');
+          api.addFriend({name: seed}, function(error, data) {
+            log.error(error);
+            setTimeout(callback, config.TM.API_REQUEST_INTERVAL);
+          });
+        }, function(err) {
+          cb();
         });
-      } else {
-        log.info('key user friends ok.');
-        fetch();
       }
     }
+  ], function (err) {
+    // start fetch and check task
+    fetch();
+    check();
   });
-}
+};
 
