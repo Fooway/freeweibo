@@ -37,7 +37,7 @@ module.exports = function(model, config) {
       service: "Gmail",
         auth: {
           user: "freeweibo.me@gmail.com",
-        pass: "*2%^jdskE#092"
+          pass: "*2%^jdskE#092"
         }
     });
 
@@ -93,7 +93,9 @@ module.exports = function(model, config) {
           content += '<p><a href="http://freeweibo.me">查看更多</a></p>';
           content += '<p>取消订阅请点击:<a href="http://freeweibo.me/cancel?mail=';
           for (var i = 0; i < mails.length; i++) {
-            sendOne(mails[i].address);
+            (function(index) {
+              setTimout(function() { sendOne(mails[index].address); }, index*5000);
+            })(i);
           };
 
           // update send mark

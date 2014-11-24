@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -6,40 +5,29 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var fetcher = require('./fetcher');
-var config = require('./app/config');
+var crawler = require('./crawler');
 var controller = require('./app/controller');
 var mail = require('./app/mail');
-var log4node = require('log4node');
+var log = require('./app/log');
 
 // change timezone to HongKong(GMT+8)
 process.env.TZ = 'Hongkong';
-
-var log = new log4node.Log4Node({level: 'info', file: path.normalize(__dirname + '/logs/run.log')});
-
-config.log = log;
 
 process.on('uncaughtException', function (e) {
   log.error(e.stack);
   sendmail({
     address: 'tristones.liu@gmail.com', 
-    sub: 'Exception On Exit at ' + (new Date()).toLocaleString('en-US'),
+    sub: 'Exception On Exit at ' + (new Date()).toISOString(),
     text: '>>> ' + e.stack
-    });
+  });
   process.exit(0);
 });
 
 
-process.on('exit', function () {
-  log.info('process exiting...');
-});
-
-// first, boot fetcher
-var service = fetcher(controller.db, config);
-
-controller.initService(service);
+// boot crawler
+crawler();
 // then, mailer
-var sendmail = mail(controller.db, config);
+mail();
 
 var app = express();
 

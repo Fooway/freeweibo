@@ -72,11 +72,11 @@ function countTweets(item, cb) {
   var number;
 
   Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
-      function (error, count) {
-        number = count;
-        if (error) number = 0;
-        cb(null, number);
-      });
+              function (error, count) {
+                number = count;
+                if (error) number = 0;
+                cb(null, number);
+              });
 }
 
 function  convert(tweets) {
