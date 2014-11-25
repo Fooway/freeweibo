@@ -15,7 +15,7 @@ process.env.TZ = 'Hongkong';
 
 process.on('uncaughtException', function (e) {
   log.error(e.stack);
-  sendmail({
+  mail.send({
     address: 'tristones.liu@gmail.com', 
     sub: 'Exception On Exit at ' + (new Date()).toISOString(),
     text: '>>> ' + e.stack
@@ -26,8 +26,8 @@ process.on('uncaughtException', function (e) {
 
 // boot crawler
 crawler();
-// then, mailer
-mail();
+// start mailer task
+mail.cron();
 
 var app = express();
 

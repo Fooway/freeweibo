@@ -2,7 +2,6 @@ var config = module.exports = {
   option: {
     username: 'admin',
     password: 'iloveYOU123',
-    salt: 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq',
     limit: 30
   },
 
