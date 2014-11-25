@@ -1,4 +1,4 @@
-# What's FilterBack?
+# What's freeWeibo?
 
 We believe that internet content censorship is anti-freedom and anti-humanity. FilterBack is a web service that automatically backup some politics-related tweets which are usually banned and deleted by the Chinese government.
 
