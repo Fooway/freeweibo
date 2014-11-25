@@ -6,7 +6,7 @@ var path = require('path');
 var crypto = require('crypto');
 var cronJob = require('cron').CronJob;
 var log = require('./log');
-var log = require('./config');
+var config = require('./config');
 var model = require('./model');
 
 var salt = config.option.salt;

@@ -299,7 +299,7 @@ module.exports = {
   },
 
   removeUser: function (req, res) {
-    var userId = req.param('data');
+    var userId = req.param('uid');
     log.info('remove user ' + userId);
     fetch.remove({uid: userId}, function() {
       res.json('ok');

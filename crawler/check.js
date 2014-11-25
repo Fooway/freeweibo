@@ -16,7 +16,7 @@ module.exports = function check() {
 
   log.info('start check... ');
 
-  async.eachSeries([
+  async.series([
     // fetch tweets from db
     function (cb) {
       model.Tweet.find({status: 0}).where('create_at')

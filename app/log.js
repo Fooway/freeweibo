@@ -1,3 +1,6 @@
+var path = require('path');
+var mkdirp= require('mkdirp');
 var log4node = require('log4node');
-
-module.exports =  new log4node.Log4Node({level: 'info', file: path.normalize(__dirname + '../logs/run.log')});
+var log_dir = path.normalize(__dirname + '/../logs/');
+mkdirp.sync(log_dir);
+module.exports =  new log4node.Log4Node({level: 'info', file: log_dir + 'run.log'});

@@ -58,7 +58,7 @@ app.get('/', controller.index);
 app.post('/auth', controller.auth);
 app.post('/subscribe', controller.subscribe);
 app.get('/cancel', controller.unsubscribe);
-app.post('/user', controller.addUsers);
+app.post('/user', controller.addUser);
 app.delete('/user', controller.removeUser);
 
 http.createServer(app).listen(app.get('port'), function(){

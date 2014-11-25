@@ -13,7 +13,7 @@ function fetchTweets() {
   var keyUser;
   var tweets;
 
-  async.eachSeries([
+  async.series([
     // get key user
     function (cb) {
       model.User.findOne({type: 'key_user'}, function (err, user) {
@@ -109,7 +109,7 @@ function _saveTweet(tweet, cb) {
 function addUser(query, done) {
   var user;
 
-  async.eachSeries([
+  async.series([
     // check if exists in db
     function (cb) {
       model.User.findOne(query, function(error, user) {
@@ -136,7 +136,7 @@ function addUser(query, done) {
         }
       });
 
-    }
+    },
     // save user
     function (cb) {
       if (user.followers_count < config.USER_FOLLOW_MIN) {

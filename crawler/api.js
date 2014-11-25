@@ -12,7 +12,6 @@ var mkdirp= require('mkdirp');
 var log = require('../app/log');
 var config = require('./config');
 
-var host = 'https://api.weibo.com';
 var img_dir = path.normalize(path.join(__dirname, '../public/images/tweets/'));
 // create directories
 mkdirp.sync(img_dir);
@@ -24,6 +23,7 @@ var account = {
 
 // api interfaces
 var interface = {
+  host: 'https://api.weibo.com',
   // get a user's tweets by uid or screen_name
   user_tweets: {
     url: "/2/statuses/home_timeline.json", 
@@ -79,7 +79,7 @@ changeAppID();
 
 // request api function
 function get(url, callback) {
- request.get('https://' + api.host + url, function(err, resp, data) {
+ request.get('https://' + interface.host + url, function(err, resp, data) {
    if (err || resp.statusCode !== 200) {
      callback(err || 'statusCode: ' + resp.statusCode, null);
    } else {
@@ -92,7 +92,7 @@ function post(url, data, callback) {
 
   // An object of options to indicate where to post to
   var options = {
-    url: api.host + url,
+    url: interface.host + url,
     form: data,
   };
 
@@ -106,7 +106,7 @@ function post(url, data, callback) {
 }
 
 function generateUrl(method, option) {
-  var param = extend({}, api[method].param, option);
+  var param = extend({}, interface[method].param, option);
 
   param.source = account.source;
 
@@ -114,7 +114,7 @@ function generateUrl(method, option) {
     delete param.screen_name;
   }
   // override
-  return api[method].url + '?' + querystring.stringify(param);
+  return interface[method].url + '?' + querystring.stringify(param);
 }
 
 module.exports = {

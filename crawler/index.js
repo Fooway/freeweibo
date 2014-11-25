@@ -73,7 +73,7 @@ module.exports = function () {
   ], function (err) {
     // start fetch and check task
     if (err) {
-      log.err(err);
+      log.error(err);
     } else {
       fetch.tweets();
       check();
