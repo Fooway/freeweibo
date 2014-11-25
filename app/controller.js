@@ -18,7 +18,6 @@ var userTemplate = jade.compile(
 
 var salt = config.option.salt;
 
-setInterval(function() {getTweetsStats(config.stats, function(){});}, 4 * 60 * 60 * 1000);
 
 function getTweets(option, cb) {
   var offset = option.offset || 0;
@@ -52,29 +51,24 @@ function getTweets(option, cb) {
 }
 
 
-function getTweetsStats(stats, cb) {
-  if (stats[0].count) {
-    cb();
-  } else {
-    async.map(stats, function (item, cb) {
-      var span = calculateTimespan(item.time);
-      var number;
+function getTweetsStats() {
+  async.map(config.stats, function (item, cb) {
+    var span = calculateTimespan(item.time);
+    var number;
 
-      Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
-                  function (error, count) {
-                    number = count;
-                    if (error) number = 0;
-                    cb(null, number);
-                  });
-    }, function(err, results){
+    Tweet.count({status: 1, create_at: { $gte: span.startTime, $lte: span.endTime}},
+                function (error, count) {
+                  number = count;
+                  if (error) number = 0;
+                  cb(null, number);
+                });
+  }, function(err, results){
     // results is now an array of stats for each file
     for (var i = 0; i < results.length; i++) {
       stats[i].count = results[i];
     };
-    cb();
-    });
-  }
-  
+    setTimeout(getTweetsStats, 4 * 60 * 60 * 1000);
+  });
 }
 
 function  convert(tweets) {
@@ -171,6 +165,7 @@ function getMonthDays(time) {
   return days;
 }
 
+getTweetsStats();
 
 module.exports = {
 
@@ -179,6 +174,7 @@ module.exports = {
     var time = req.query.time || 'all';
     var uid = req.query.userid;
     var option = calculateTimespan(time);
+
     option.uid = uid;
 
     if (req.xhr) {
@@ -203,34 +199,31 @@ module.exports = {
 
     getTweets(option, function(error, tweets) {
       if (error) {
-        res.redirect('404');
-      } else {
-        getTweetsStats(config.stats, function() {
-          User.find({}).sort('-delete_attributed').limit(20).exec(function(error, users) {
-            if (error) {
-              console.error(error.message);
-              res.redirect('404');
-            } else {
-              convert(tweets);
-              res.render('index', { 
-                title: "FreeWeibo",
-                tweets: tweets,
-                users: users,
-                stats: config.stats,
-                initOffset: tweets.length,
-                initLimit: confLimit
-              });
-            }
-          });
-        });
+        return res.redirect('404');
       }
+      User.find().sort('-delete_attributed').limit(20)
+      .exec(function(error, users) {
+        if (error) {
+          log.error(error.message);
+          return res.redirect('404');
+        }
+        convert(tweets);
+        res.render('index', { 
+          title: "FreeWeibo",
+          tweets: tweets,
+          users: users,
+          stats: config.stats,
+          initOffset: tweets.length,
+          initLimit: 30
+        });
+      });
     });
   },
 
   // POST: subscribe email to tweets [/subscribe]:
   subscribe: function(req, res) {
     var email = req.param('data');
-    model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error,mail) {
+    model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error, mail) {
       res.json({error: !!error});
     });
   },
@@ -240,6 +233,7 @@ module.exports = {
     var email = req.param('mail');
     var hash = req.param('hash');
     var md5 = crypto.createHash('md5');
+
     md5.update(salt + email);
     if (md5.digest('base64') != hash) {
       res.render('unsuscribe', {error: '非法的取消订阅请求'});
