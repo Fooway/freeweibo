@@ -176,7 +176,7 @@ window.freeWeibo.login = function () {
     var name = $('form #username').val();
     var password = $('form #password').val();
     console.log('start send login...');
-    $.post('/author', {username: name, password: password}, function(res) {
+    $.post('/auth', {username: name, password: password}, function(res) {
       if (res.status) {
         document.location.href = '/admin';
         console.log('login success');
@@ -192,7 +192,12 @@ $(function() {
     var userid = parseInt($(this).prev().attr('href').replace('//weibo.com/u/', ''));
 
     $(this).parents('li').remove();
-    $.post('/delete-user', { data: userid}, function() {});
+    $.ajax({
+      url:'/user', 
+      method: 'DELETE',
+      data: { uid: userid},
+      dataType: 'json'
+    });
   });
 
   // highlight search item
