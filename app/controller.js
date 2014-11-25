@@ -65,7 +65,7 @@ function getTweetsStats() {
   }, function(err, results){
     // results is now an array of stats for each file
     for (var i = 0; i < results.length; i++) {
-      stats[i].count = results[i];
+      config.stats[i].count = results[i];
     };
     setTimeout(getTweetsStats, 4 * 60 * 60 * 1000);
   });
