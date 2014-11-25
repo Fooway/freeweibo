@@ -9,7 +9,6 @@ var extend = require('extend');
 var async = require('async');
 var path = require('path');
 var mkdirp= require('mkdirp');
-var model = require('../app/model')();
 var log = require('../app/log');
 var config = require('./config');
 

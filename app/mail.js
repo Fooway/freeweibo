@@ -6,9 +6,10 @@ var path = require('path');
 var crypto = require('crypto');
 var cronJob = require('cron').CronJob;
 var log = require('./log');
-var model = require('./model')();
+var log = require('./config');
+var model = require('./model');
 
-var salt = 'gdjk&*#djksa^&#*HGJKh*(#)HJGDJOKHS327!@DFJkpj-fiw2jq';
+var salt = config.option.salt;
 var fileStr = fs.readFileSync(path.normalize(__dirname + '/../views/templates/mail-tweet.jade'),
                               {encoding: 'utf-8'});
 var tmpl = jade.compile(fileStr);

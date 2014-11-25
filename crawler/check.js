@@ -6,7 +6,7 @@ var async = require('async');
 var api = require('./api');
 var config = require('./config');
 var fetch = require('./fetch');
-var model = require('../app/model')();
+var model = require('../app/model');
 var log = require('../app/log');
 
 // check all the tweets' status in db.

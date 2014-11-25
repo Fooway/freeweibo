@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var model = require('./model')();
+var model = require('./model');
 var config = require('./config');
 var fetch = require('../crawler/fetch');
 var crypto = require('crypto');
@@ -8,22 +8,21 @@ var async = require('async');
 var jade = require('jade');
 var User = model.User;
 var Tweet = model.Tweet;
-var service = {};
 
-
-var template = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'),
-      {encoding: 'utf-8'}));
-var userTemplate = jade.compile(fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'),
-      {encoding: 'utf-8'}));
+var template = jade.compile(
+  fs.readFileSync(path.normalize(__dirname + '/../views/templates/tweet.jade'),
+  {encoding: 'utf-8'}));
+var userTemplate = jade.compile(
+  fs.readFileSync(path.normalize(__dirname + '/../views/templates/user.jade'),
+ {encoding: 'utf-8'}));
 
 var salt = config.option.salt;
-var confLimit = config.option.limit;
 
 setInterval(function() {getTweetsStats(config.stats, function(){});}, 4 * 60 * 60 * 1000);
 
 function getTweets(option, cb) {
   var offset = option.offset || 0;
-  var limit = option.limit || confLimit;
+  var limit = option.limit || 20;
   var uid = option.uid;
   var startTime = option.startTime;
   var endTime = option.endTime;

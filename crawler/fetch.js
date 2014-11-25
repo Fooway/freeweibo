@@ -3,7 +3,7 @@
  * */
 var api = require('./api');
 var async = require('async');
-var model = require('../app/model')();
+var model = require('../app/model');
 var log = require('../app/log');
 
 // getting key user's latest tweets
