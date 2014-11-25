@@ -173,7 +173,23 @@ function addUser(query, done) {
   });
 }
 
+function removeUser(query, cb) {
+
+  if (!cb) cb = function () {};
+
+  model.User.fineOne(query, function (err, user) {
+    if (err || !user) {
+      return cb(err || 'user not exists');
+    }
+
+    user.remove(function () {
+      api.removeFriend({uid: user.uid}, cb);
+    });
+  });
+}
+
 module.exports = {
   tweets: fetchTweets,
-  user: addUser
-}
+  user: addUser,
+  remove: removeUser
+};

@@ -10,8 +10,6 @@ var fetch = require('./fetch');
 var model = require('../app/model')();
 var log = require('../app/log');
 
-// check all the tweets' status in db.
-
 function deleteTweets() {
   var now = (new Date()).valueOf();
 
@@ -74,8 +72,9 @@ function deleteUsers() {
     function (cb) {
       async.eachSeries(users, function (user, callback) {
         log.info('removing user [' + user.name + ']');
-        user.remove(function() {});
-        api.removeFriend(user.name, callback);
+        user.remove(function() {
+          api.removeFriend({screen_name: user.name}, callback);
+        });
       }, cb);
     }
   ], function () {

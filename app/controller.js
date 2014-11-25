@@ -229,7 +229,7 @@ module.exports = {
   },
 
   // POST: subscribe email to tweets [/subscribe]:
-  email: function(req, res) {
+  subscribe: function(req, res) {
     var email = req.param('data');
     model.Mail.update({address: email}, {address: email}, { upsert: true }, function(error,mail) {
       res.json({error: !!error});

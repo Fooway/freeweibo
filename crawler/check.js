@@ -10,7 +10,7 @@ var model = require('../app/model')();
 var log = require('../app/log');
 
 // check all the tweets' status in db.
-function check() {
+module.exports = function check() {
   var now = (new Date()).valueOf();
   var tweets;
 
@@ -80,52 +80,6 @@ function check() {
     log.error(err);
     setTimeout(check, config.TM.CHECK_INTERVAL);
   });
-}
-
-function deleteOld() {
-  var now = (new Date()).valueOf();
-
-  log.info('start deleting old tweets...');
-
-  async.series([
-    // first, remove all old tweets with no image
-    function (cb) {
-      model.Tweet.find({status: 0}).
-        where('create_at').lt(now - config.TM.DELETE_INTERVAL).
-        where('pic_name').equals('').
-        remove(cb);
-    },
-    // then, remove all old tweets with image
-    function (cb) {
-      model.Tweet.find({status: 0}).
-        where('pic_name').ne('').
-        where('create_at').lt(now - config.TM.DELETE_INTERVAL).
-        select('tid pic_name').
-        exec(function(error, tweets) {
-        if (error) {
-          return cb(error);
-        }
-        async.each(tweets, function(tweet, callback) {
-          model.Tweet.remove({tid: tweet.tid}, function(){});
-          var files = api.imagePath(tweet.pic_name);
-
-          for (var i = 0; i < files.length; i++) {
-            fs.unlink(files[i]);
-          };
-          callback();
-        }, cb);
-      });
-
-    }
-  ], function (err) {
-    log.error(err);
-    setTimeout(deleteOld, config.TM.DELETE_TASK);
-  });
-    
-}
-
-module.exports = function () {
-  check();
-  deleteOld();
 };
+
 

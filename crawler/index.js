@@ -11,6 +11,7 @@ var seedTweeters = require('./seed-tweeters');
 var config = require('./config');
 var fetch = require('./fetch');
 var check = require('./check');
+var recylce = require('./recycle');
 
 module.exports = function () {
   var user;
@@ -76,6 +77,7 @@ module.exports = function () {
     } else {
       fetch.tweets();
       check();
+      recycle();
     }
   });
 };

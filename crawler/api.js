@@ -44,6 +44,11 @@ var interface = {
     param: {}
   },
 
+  remove_friend: {
+    url: "/2/friendships/destroy.json",
+    param: {}
+  },
+
   get_user:  {    // get user by id
     url: "/2/users/show.json" ,
     param: {}
@@ -126,6 +131,16 @@ module.exports = {
 
   addFriend: function(option /* uid or name */, callback) {
     post(generateUrl('add_friend', {}), option, function(error, data) { 
+      if (error)  {
+        return callback(error);
+      }
+      callback(null, data);
+    });
+  },
+
+
+  removeFriend: function(option /* uid or name */, callback) {
+    post(generateUrl('remove_friend', {}), option, function(error, data) { 
       if (error)  {
         return callback(error);
       }
