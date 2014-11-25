@@ -51,15 +51,15 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/about', controller.about);
-app.get('/cancel', controller.unsubscribe);
 app.get('/admin', controller.admin);
 app.get('/login', controller.login);
 app.get('/', controller.index);
 
-app.post('/author', controller.author);
-app.post('/email', controller.email);
-app.post('/add-user', controller.adminUsers);
-app.post('/delete-user', controller.adminUsers);
+app.post('/auth', controller.auth);
+app.post('/subscribe', controller.subscribe);
+app.get('/cancel', controller.unsubscribe);
+app.post('/user', controller.addUsers);
+app.delete('/user', controller.removeUser);
 
 http.createServer(app).listen(app.get('port'), function(){
   log.info('Express server listening on port ' + app.get('port'));

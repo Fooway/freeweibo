@@ -255,7 +255,7 @@ module.exports = {
     res.render('login', {title: "Admin-Login | FreeWeibo"});
   },
 
-  author: function(req, res) {
+  auth: function(req, res) {
     var username = req.param('username');
     var password = req.param('password');
 
