@@ -16,6 +16,6 @@ ssh $USER@$SERVER "cd $DEPLOY_PATH && \
                    git pull origin master&& \
                    npm install && 
                    stylus  public/stylesheets/ &&\
-                   /etc/init.d/filterback restart"
+                   /etc/init.d/freeweibo restart"
 
 SUCCESS=true
