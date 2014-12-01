@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SERVER=( 's.chaos-lab.com' )
-DEPLOY_PATH=/var/www/filterback
-USER=xiaolei
+SERVER=( 'YOUR REMOTE SERVER' )
+DEPLOY_PATH=/var/www/freeweibo
+USER=username
 
 ENVIRONMENT=${1:-"production"}
 REF=${2:-"master"}
